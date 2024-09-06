@@ -1,0 +1,48 @@
+Entidades:
+
+usuario : {
+  id: {"tipo": "int", "descricao": "Identificador do usuário chave primária"},
+  nome: {"tipo": "string", "descricao": "Nome do usuário", "observacao": "Campo obrigatório; criar índice"},
+  dataNascimento: {"tipo": "date", "descricao": "Data de nascimento do usuário", "observacao": "Campo obrigatório"},
+  email: {"tipo": "string", "descricao": "E-mail do usuário", "observacao": "Campo obrigatório; criar índice"},
+  senha: {"tipo": "string", "descricao": "Senha do usuário", "observacao": "Campo obrigatório"}
+}
+
+administradores : {
+  id: {"tipo": "int", "descricao": "Identificador do papel de administrador chave primária"},
+  idUsuario: {"tipo": "int", "descricao": "Identificador do usuário chave estrangeira", "observacao": "Campo obrigatório; criar índice"}
+}
+
+quadro : {
+    id: {"tipo": "int", "descricao": "Identificador do quadro chave primária"},
+    nome: {"tipo": "string", "descricao": "Nome do quadro de mensagens", "observacao": "Campo obrigatório; criar índice"},
+    descricao: {"tipo": "string", "descricao": "Descrição do quadro de mensagens", "observacao": "Campo obrigatório"},
+    dono : {"tipo": "int", "descricao": "Identificador do dono do quadro chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    publico: {"tipo": "boolean", "descricao": "Se o quadro é público ou exige inscrição e aprovação", "observacao": "Campo obrigatório", valorPadrao: true}
+}
+
+membrosQuadro : {
+    id: {"tipo": "int", "descricao": "Identificador do membro do quadro chave primária"},
+    idQuadro: {"tipo": "int", "descricao": "Identificador do quadro de mensagens chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    idUsuario: {"tipo": "int", "descricao": "Identificador do usuário chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    aprovado: {"tipo": "boolean", "descricao": "Se o membro foi aprovado para participar do quadro", "observacao": "Campo obrigatório", valorPadrao: false}
+}
+
+mensagem : {
+    id: {"tipo": "int", "descricao": "Identificador da mensagem chave primária"},
+    idQuadro: {"tipo": "int", "descricao": "Identificador do quadro de mensagens chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    idUsuario: {"tipo": "int", "descricao": "Identificador do usuário chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    dataHora: {"tipo": "datetime", "descricao": "Data e hora da mensagem", "observacao": "Campo obrigatório"},
+    texto: {"tipo": "string", "descricao": "Texto da mensagem", "observacao": "Campo obrigatório"}, 
+    anexo: {"tipo": "string", "descricao": "URL do anexo", "observacao": "Campo opcional"}, 
+    icone: {"tipo": "string", "descricao": "URL do ícone", "observacao": "Campo opcional"}
+}
+
+reacoes : {
+    id: {"tipo": "int", "descricao": "Identificador da reação chave primária"},
+    dataHora: {"tipo": "datetime", "descricao": "Data e hora da reação", "observacao": "Campo obrigatório"},
+    idMensagem: {"tipo": "int", "descricao": "Identificador da mensagem chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    idUsuario: {"tipo": "int", "descricao": "Identificador do usuário chave estrangeira", "observacao": "Campo obrigatório; criar índice"},
+    tipo: {"tipo": "string", "descricao": "Tipo da reação", "observacao": "Campo obrigatório"}
+}
+

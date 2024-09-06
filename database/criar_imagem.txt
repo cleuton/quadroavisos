@@ -1,0 +1,9 @@
+docker build -t backend_db:0.0.1 .
+
+docker run --name backend_db -p 5432:5432 -d backend_db:0.0.1
+
+docker exec -it backend_db bash
+
+psql -U postgres
+
+docker rm -f $(docker ps -q -a)
