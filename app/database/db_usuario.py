@@ -1,4 +1,3 @@
-import psycopg2
 from database.db_pool import get_connection, return_connection
 from database.modelo import Usuario
 
