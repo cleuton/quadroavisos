@@ -1,7 +1,36 @@
 import unittest
+
+import sys
+import os
+
+# Caminho para o diretório raiz do projeto
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from testcontainers.postgres import PostgresContainer
 from database.db_usuario import validar_usuario, obter_usuario
+from database.db_pool import reset_connection_pool
 
 class TestDbUsuario(unittest.TestCase):
+
+    _postgres = None
+    @classmethod
+    def setUpClass(cls):
+        print(f"******* SetupClass INVOKED ******")
+        sql_script_path = os.path.dirname(os.path.abspath(__file__))
+        print(sql_script_path)
+        cls._postgres = PostgresContainer("postgres:latest").with_volume_mapping(sql_script_path,
+                                                                        "/docker-entrypoint-initdb.d")
+        cls._postgres.start()
+        os.environ["DB_CONN"] = cls._postgres.get_connection_url()
+        os.environ["DB_HOST"] = cls._postgres.get_container_host_ip()
+        os.environ["DB_PORT"] = cls._postgres.get_exposed_port(5432)
+        os.environ["DB_USER"] = cls._postgres.username
+        os.environ["DB_PASS"] = cls._postgres.password
+        os.environ["DB_DATABASE"] = cls._postgres.dbname
+        reset_connection_pool()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._postgres.stop()
 
     def setUp(self):
         # Configurações iniciais para os testes

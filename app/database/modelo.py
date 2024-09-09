@@ -95,7 +95,7 @@ class MembrosQuadro:
         return self.id > other.id
 
 class Mensagem:
-    def __init__(self, id, idQuadro, idUsuario, dataHora, texto, anexo, icone):
+    def __init__(self, id, idQuadro, idUsuario, dataHora, titulo, texto, anexo, icone, expiraEm):
         self.id = id
         self.idQuadro = idQuadro
         self.idUsuario = idUsuario
@@ -103,6 +103,8 @@ class Mensagem:
         self.texto = texto
         self.anexo = anexo
         self.icone = icone
+        self.titulo = titulo
+        self.expiraEm = expiraEm
 
     def __str__(self):
         return f"Mensagem(id={self.id}, idQuadro={self.idQuadro}, idUsuario={self.idUsuario}, dataHora={self.dataHora}, texto={self.texto}, anexo={self.anexo}, icone={self.icone})"
@@ -145,3 +147,14 @@ class Reacoes:
 
     def __gt__(self, other):
         return self.id > other.id
+
+class QuadroUltimaMensagem:
+    def __init__(self, id, nome, descricao, dono, publico, dataHora, icone, titulo):
+        self.id = id
+        self.nome = nome
+        self.descricao = descricao
+        self.dono = dono
+        self.publico = publico
+        self.dataHora = dataHora
+        self.icone = icone
+        self.titulo = titulo
