@@ -1,4 +1,4 @@
-from database.db_pool import get_connection, return_connection
+from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Usuario
 
 def obter_usuario(id:int) -> Usuario:
@@ -10,7 +10,7 @@ def obter_usuario(id:int) -> Usuario:
         cursor = conn.cursor()
         
         # Executar a consulta
-        cursor.execute("SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE id = %s", (id,))
+        cursor.execute(sql.usuarioById, (id,))
         user = cursor.fetchone()
         
         # Verificar se o usuário foi encontrado
@@ -37,7 +37,7 @@ def validar_usuario(email:str, password:str) -> Usuario:
         cursor = conn.cursor()
         
         # Executar a consulta
-        cursor.execute("SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE email = %s AND senha = %s", (email, password))
+        cursor.execute(sql.usuarioByEmailSenha, (email, password))
         user = cursor.fetchone()
         
         # Verificar se o usuário foi encontrado

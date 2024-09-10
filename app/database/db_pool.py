@@ -1,10 +1,32 @@
 import psycopg2
 from psycopg2 import pool
 import os
+import toml
 
 # Cria o pool de conexões globalmente com parâmetros adequados
 
 connection_pool = None
+
+# Criar a classe que vai armazenar as propriedades
+class SqlConfig:
+    def __init__(self):
+        pass
+
+    def carregar_propriedades(self, arquivo):
+        with open(arquivo, 'r', encoding='utf-8') as f:
+            dados = toml.load(f)
+
+            if "query" in dados:
+                for chave, valor in dados["query"].items():
+                    setattr(self, chave, valor)
+
+    def imprimir_dicionario(self):
+        print(self.__dict__)
+
+# Carregando propriedades:
+sql = SqlConfig()
+sql.carregar_propriedades(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sql.toml'))
+sql.imprimir_dicionario()
 
 def cria_connection_pool():
     global connection_pool

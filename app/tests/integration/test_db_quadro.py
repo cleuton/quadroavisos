@@ -48,9 +48,15 @@ class TestDbQuadro(unittest.TestCase):
 
     def test_obter_quadros_usuario_nao_admin(self):
         # Testar a função obter_quadros_usuario quando o usuário não é admin
-        quadros = obter_quadros_usuario(1)
+        quadros = obter_quadros_usuario(1) # Alice
 
-        # Verificar se a função retornou os quadros corretos
+        # Alice tem os quadros:
+        #   "Quadro de Anúncios"(1): Público
+        #   "Quadro de Projetos"(2): Membro
+        #   "Quadro de Projetos da Alice"(4): Dono
+        #
+
+        # Verificar se a função retornou os quadros corretos e a última mensagem correta
         self.assertIsNotNone(quadros)
         self.assertEqual(len(quadros), 3)
         quadro_privado1 = [quadro for quadro in quadros if quadro.id == 4][0] # dona
@@ -64,13 +70,28 @@ class TestDbQuadro(unittest.TestCase):
         self.assertTrue(quadro_privado1.id == 4)
         self.assertTrue(quadro_privado1.descricao == 'Quadro para discussão de projetos da Alice')
         self.assertFalse(quadro_privado1.titulo is None)
-        self.assertTrue(quadro_privado1.titulo == 'Vamos começar o projeto novo')
+        self.assertTrue(quadro_privado1.titulo == 'Quem é o stakeholder')
         self.assertTrue(quadro_privado2.id == 2)
         self.assertTrue(quadro_privado2.descricao == 'Quadro para discussão de projetos')
         self.assertFalse(quadro_privado2.titulo is None)
         self.assertTrue(quadro_privado2.titulo == 'Novo projeto')
 
+    def test_obter_quadros_usuario_nao_admin_nao_aprovado(self):
+        # Testar a função obter_quadros_usuario quando o usuário não é admin e não foi aprovado como membro
+        quadros = obter_quadros_usuario(5) # Enésio
 
+        # Enésio tem os quadros:
+        #   "Quadro de Anúncios"(1): Público
+
+        # Verificar se a função retornou os quadros corretos
+        self.assertIsNotNone(quadros)
+        self.assertEqual(len(quadros), 1)
+        quadro_publico = [quadro for quadro in quadros if quadro.publico == True][0]
+
+        self.assertTrue(quadro_publico.id == 1)
+        self.assertTrue(quadro_publico.descricao == 'Quadro para anúncios gerais')
+        self.assertFalse(quadro_publico.titulo is None)
+        self.assertTrue(quadro_publico.titulo == 'Novo evento')
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from database.db_pool import get_connection, return_connection
+from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Quadro, QuadroUltimaMensagem
 from database.db_admins import eh_admin
 
@@ -14,7 +14,7 @@ def obter_quadro(id:int) -> Quadro:
         cursor = conn.cursor()
         
         # Executar a consulta
-        cursor.execute("SELECT id, nome, descricao, dono, publico FROM quadro WHERE id = %s", (id,))
+        cursor.execute(sql.quadroById, (id,))
         quadro = cursor.fetchone()
         
         # Verificar se o quadro foi encontrado
@@ -41,72 +41,20 @@ def obter_quadros_usuario(idUsuario: Optional[int]) -> List[QuadroUltimaMensagem
         # Obter uma conexão do pool
         conn = get_connection()
         cursor = conn.cursor()
-        
+
         # Se o usuário não estiver logado, retornar os quadros públicos
         if idUsuario is None or idUsuario == 0:
-            cursor.execute("""
-                       WITH ultima_mensagem AS (
-                            SELECT m.*, 
-                                ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
-                                FROM mensagem m
-                        )
-                       SELECT Q.id, Q.nome, Q.descricao, Q.dono, Q.publico, um.dataHora, um.icone, um.titulo 
-                                FROM quadro Q                                 
-                                    LEFT JOIN ultima_mensagem um ON Q.id = um.idQuadro AND um.row_num = 1
-                       WHERE publico = TRUE
-                           """)
-            quadros = cursor.fetchall()
-            if quadros:
-                return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
-            else:
-                return None
+            return _quadros_usuario_nao_identificado(cursor)
 
         # Usuário foi informado, vamos ver se é administrador:
         admin = eh_admin(idUsuario)
+        # Se o usuário for administrador, retornar todos os quadros:
+        if admin:
+            return _quadros_admin(cursor)
 
-        if admin: 
-            # Se o usuário for administrador, retornar todos os quadros:
-            cursor.execute("""
-                WITH ultima_mensagem AS (
-                        SELECT m.*, 
-                            ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
-                            FROM mensagem m
-                    )
-                SELECT Q.id, Q.nome, Q.descricao, Q.dono, Q.publico, um.dataHora, um.icone, um.titulo 
-                            FROM quadro Q                                 
-                                LEFT JOIN ultima_mensagem um ON Q.id = um.idQuadro AND um.row_num = 1
-            """)
-            quadros = cursor.fetchall()
-            if quadros:
-                return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
-            else:
-                return None
-        else:
-            # Executar a consulta considerando o usuário
-            cursor.execute("""
-                WITH ultima_mensagem AS (
-                    SELECT m.*, 
-                        ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
-                    FROM mensagem m
-                )
-                SELECT q.id, q.nome, q.descricao, q.dono, q.publico, um.dataHora, um.icone, um.titulo
-                FROM quadro q
-                JOIN membrosquadro mq ON q.id = mq.idQuadro
-                LEFT JOIN ultima_mensagem um ON q.id = um.idQuadro AND um.row_num = 1
-                WHERE mq.idUsuario = %s -- Apenas quadros onde o usuário é membro ou dono (donos têm que ser membros também)
-                UNION
-                SELECT q.id, q.nome, q.descricao, q.dono, q.publico, um.dataHora, um.icone, um.titulo
-                FROM quadro q
-                LEFT JOIN ultima_mensagem um ON q.id = um.idQuadro AND um.row_num = 1
-                WHERE q.publico = TRUE;  -- Inclui também os quadros públicos""", (idUsuario,))
+        # Para os outros casos, executar a consulta considerando o usuário
+        return _quadros_por_usuario(cursor, idUsuario)
 
-            quadros = cursor.fetchall()
-
-            # Verificar se os quadros foram encontrados
-            if quadros:
-                return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
-            else:
-                return None
     except Exception as e:
         print(f"Erro ao obter quadros do usuário: {idUsuario} : {e}")
         return None
@@ -116,3 +64,30 @@ def obter_quadros_usuario(idUsuario: Optional[int]) -> List[QuadroUltimaMensagem
             cursor.close()
         if conn:
             return_connection(conn)
+
+def _quadros_usuario_nao_identificado(cursor):
+    cursor.execute(sql.quadroPublico)
+    quadros = cursor.fetchall()
+    if quadros:
+        return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
+    else:
+        return None
+
+def _quadros_admin(cursor):
+    cursor.execute(sql.quadroAdmin)
+    quadros = cursor.fetchall()
+    if quadros:
+        return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
+    else:
+        return None
+
+def _quadros_por_usuario(cursor, idUsuario):
+    # Precisa repetir o idUsuario porque tem o parâmetro duas vezes
+    cursor.execute(sql.quadroUsuario, (idUsuario, idUsuario))
+    quadros = cursor.fetchall()
+
+    # Verificar se os quadros foram encontrados
+    if quadros:
+        return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
+    else:
+        return None

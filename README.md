@@ -16,7 +16,12 @@ Para acessar os quadros privados, é necessário fazer **login**.
 
 ## Caso de uso: Login
 
-O **frontend** faz um request para `/api/login` passando seu **email** e a **senha** e vê a lista de quadros privados e públicos aos quais ele tem acesso, cada um com o título da última mensagem postada.
+O **frontend** faz um request para `/api/login` passando seu **email** e a **senha** e vê a lista de quadros privados e públicos aos quais ele tem acesso, cada um com o título da última mensagem postada. Para que um quadro apareça para o usuário, ele tem que ser membro APROVADO do quadro (só o dono do quadro pode aprovar). Caso ele seja administrador do site, ele vê todos os quadros, independentemente de ser membro, dono ou de ter sido aprovado.
+
+- Pendências: 
+    1) Selecionar um quadro
+    2) Ver detalhes da mensagem 
+    3) Adicionar reação à mensagem
 
 O comportamento de selecionar um quadro ou uma mensagem é igual ao "Acesso inicial".
 

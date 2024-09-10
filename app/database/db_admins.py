@@ -11,11 +11,11 @@ def eh_admin(id:int) -> bool:
         cursor = conn.cursor()
         
         # Executar a consulta
-        cursor.execute("SELECT * FROM administradores WHERE id = %s", (id,))
+        cursor.execute("SELECT * FROM administradores WHERE idUsuario = %s", (id,))
         admin = cursor.fetchone()
         
         # Verificar se o usuário existe em administradores
-        if admin[1] == id:
+        if admin:
             return True
         else:
             return False

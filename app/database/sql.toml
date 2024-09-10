@@ -1,0 +1,43 @@
+[query]
+usuarioById = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE id = %s"
+usuarioByEmailSenha = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE email = %s AND senha = %s"
+quadroById = "SELECT id, nome, descricao, dono, publico FROM quadro WHERE id = %s"
+quadroPublico = """WITH ultima_mensagem AS (
+    SELECT m.*, 
+    ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
+    FROM mensagem m
+    )
+    SELECT Q.id, Q.nome, Q.descricao, Q.dono, Q.publico, um.dataHora, um.icone, um.titulo 
+    FROM quadro Q                                 
+    LEFT JOIN ultima_mensagem um ON Q.id = um.idQuadro AND um.row_num = 1
+    WHERE publico = TRUE"""
+quadroAdmin = """WITH ultima_mensagem AS (
+    SELECT m.*,
+    ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
+    FROM mensagem m
+    )
+    SELECT Q.id, Q.nome, Q.descricao, Q.dono, Q.publico, um.dataHora, um.icone, um.titulo
+    FROM quadro Q
+    LEFT JOIN ultima_mensagem um ON Q.id = um.idQuadro AND um.row_num = 1"""
+quadroUsuario = """WITH ultima_mensagem AS (
+    SELECT m.*,
+    ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
+    FROM mensagem m
+)
+SELECT DISTINCT
+    q.id,
+    q.nome,
+    q.descricao,
+    q.dono,
+    q.publico,
+    um.dataHora,
+    um.icone,
+    um.titulo
+FROM quadro q
+LEFT JOIN membrosQuadro mq ON q.id = mq.idQuadro AND mq.aprovado = TRUE
+LEFT JOIN ultima_mensagem um ON q.id = um.idQuadro AND um.row_num = 1
+WHERE
+    q.dono = %s
+    OR mq.idUsuario = %s
+    OR q.publico = TRUE
+"""
