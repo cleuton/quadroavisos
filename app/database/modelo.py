@@ -95,10 +95,11 @@ class MembrosQuadro:
         return self.id > other.id
 
 class Mensagem:
-    def __init__(self, id, idQuadro, idUsuario, dataHora, titulo, texto, anexo, icone, expiraEm):
+    def __init__(self, id, idQuadro, idUsuario, nomeUsuario, dataHora, titulo, texto, anexo, expiraEm, icone):
         self.id = id
         self.idQuadro = idQuadro
         self.idUsuario = idUsuario
+        self.nomeUsuario = nomeUsuario
         self.dataHora = dataHora
         self.texto = texto
         self.anexo = anexo

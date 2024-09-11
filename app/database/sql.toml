@@ -41,3 +41,11 @@ WHERE
     OR mq.idUsuario = %s
     OR q.publico = TRUE
 """
+mensagem="SELECT * from mensagem where id = %s"
+mensagensDesc = """SELECT m.*, u.nome
+                    FROM mensagem m INNER JOIN usuario u
+                        on m.idUsuario = u.id
+                    WHERE m.idQuadro = %s
+                        AND m.id <= %s
+                    ORDER BY id DESC
+                    LIMIT %s;"""
