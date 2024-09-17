@@ -6,8 +6,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 print(f"SYS PATH: ****** {sys.path}")
 from testcontainers.postgres import PostgresContainer
-from database.db_mensagens import listar_mensagens_desc, obter_mensagem
+from database.db_mensagens import listar_mensagens_desc, obter_mensagem, obter_mensagem_reacoes
 from database.db_pool import reset_connection_pool
+from database.modelo import Reacao, ReacaoAutor
 import os
 
 class TestMensagens(unittest.TestCase):
@@ -52,3 +53,31 @@ class TestMensagens(unittest.TestCase):
         self.assertTrue(msg.nomeUsuario is None)
         self.assertTrue(msg.idQuadro == 3)
         self.assertTrue(msg.titulo == 'Novo projeto3')
+
+    def test_obter_mensagem_com_reacoes(self):
+        msg = obter_mensagem_reacoes(6)
+        id_autor = 2
+        nome_autor = "Bob Santos"
+        reacoes = [
+            ReacaoAutor(Reacao(5, '2023-01-04 12:10:00', 6, 1, 'curtir.png'), 'Alice Silva'),
+            ReacaoAutor(Reacao(4,'2023-01-03 12:05:00', 6, 3, 'curioso.png'),'Carlos Pereira'),
+        ]
+        self.assertTrue(msg.mensagem.id == 6)
+        self.assertTrue(msg.mensagem.idUsuario == id_autor)
+        self.assertTrue(msg.mensagem.nomeUsuario == nome_autor)
+        self.assertTrue(msg.mensagem.idQuadro == 3)
+        self.assertTrue(msg.mensagem.titulo == 'Novo projeto3')
+        self.assertTrue(len(msg.reacoes) == 2)
+        self.assertTrue(msg.reacoes[0].nomeAutor == reacoes[0].nomeAutor)
+        self.assertTrue(msg.reacoes[0].reacao.id == reacoes[0].reacao.id)
+        self.assertTrue(msg.reacoes[0].reacao.dataHora == reacoes[0].reacao.dataHora)
+        self.assertTrue(msg.reacoes[0].reacao.idMensagem == reacoes[0].reacao.idMensagem)
+        self.assertTrue(msg.reacoes[0].reacao.idUsuario == reacoes[0].reacao.idUsuario)
+        self.assertTrue(msg.reacoes[0].reacao.tipo == reacoes[0].reacao.tipo)
+        self.assertTrue(msg.reacoes[1].nomeAutor == reacoes[1].nomeAutor)
+        self.assertTrue(msg.reacoes[1].reacao.id == reacoes[1].reacao.id)
+        self.assertTrue(msg.reacoes[1].reacao.dataHora == reacoes[1].reacao.dataHora)
+        self.assertTrue(msg.reacoes[1].reacao.idMensagem == reacoes[1].reacao.idMensagem)
+        self.assertTrue(msg.reacoes[1].reacao.idUsuario == reacoes[1].reacao.idUsuario)
+        self.assertTrue(msg.reacoes[1].reacao.tipo == reacoes[1].reacao.tipo)
+

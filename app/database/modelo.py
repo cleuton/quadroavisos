@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class Usuario:
     def __init__(self, id, nome, dataNascimento, email, senha):
         self.id = id
@@ -124,10 +127,13 @@ class Mensagem:
     def __gt__(self, other):
         return self.id > other.id
 
-class Reacoes:
+class Reacao:
     def __init__(self, id, dataHora, idMensagem, idUsuario, tipo):
         self.id = id
-        self.dataHora = dataHora
+        if type(dataHora) == str:
+            self.dataHora = datetime.strptime(dataHora,'%Y-%m-%d %H:%M:%S')
+        else:
+            self.dataHora = dataHora
         self.idMensagem = idMensagem
         self.idUsuario = idUsuario
         self.tipo = tipo
@@ -136,7 +142,7 @@ class Reacoes:
         return f"Reacoes(id={self.id}, dataHora={self.dataHora}, idMensagem={self.idMensagem}, idUsuario={self.idUsuario}, tipo={self.tipo})"
 
     def __eq__(self, other):
-        if isinstance(other, Reacoes):
+        if isinstance(other, Reacao):
             return self.id == other.id and self.idMensagem == other.idMensagem and self.idUsuario == other.idUsuario
         return False
 
@@ -159,3 +165,16 @@ class QuadroUltimaMensagem:
         self.dataHora = dataHora
         self.icone = icone
         self.titulo = titulo
+
+class ReacaoAutor:
+    def __init__(self, reacao: Reacao, nomeAutor: str):
+        self.reacao = reacao
+        self.nomeAutor = nomeAutor
+
+class MensagemComReacoes:
+    def __init__(self, mensagem: Mensagem, reacoes: [ReacaoAutor]):
+        self.mensagem = mensagem
+        self.reacoes = reacoes
+
+
+

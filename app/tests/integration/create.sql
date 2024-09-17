@@ -53,16 +53,17 @@ CREATE INDEX idx_mensagem_idQuadro ON mensagem(idQuadro);
 CREATE INDEX idx_mensagem_titulo ON mensagem(titulo);
 CREATE INDEX idx_mensagem_idUsuario ON mensagem(idUsuario);
 
--- Create table reacoes
-CREATE TABLE reacoes (
+-- Create table reacao
+CREATE TABLE reacao (
     id SERIAL PRIMARY KEY,
     dataHora TIMESTAMP NOT NULL,
     idMensagem INT NOT NULL REFERENCES mensagem(id),
     idUsuario INT NOT NULL REFERENCES usuario(id),
     tipo VARCHAR(255) NOT NULL
 );
-CREATE INDEX idx_reacoes_idMensagem ON reacoes(idMensagem);
-CREATE INDEX idx_reacoes_idUsuario ON reacoes(idUsuario);
+CREATE INDEX idx_reacoes_idMensagem ON reacao(idMensagem);
+CREATE INDEX idx_reacoes_idUsuario ON reacao(idUsuario);
+CREATE INDEX idx_reacoes_dataHora ON reacao(dataHora desc);
 
 -- Inserir dados iniciais
 
@@ -119,8 +120,9 @@ INSERT INTO mensagem (idQuadro, idUsuario, dataHora, titulo, texto, anexo, icone
 
 
 -- Insert fake data into reacoes
-INSERT INTO reacoes (dataHora, idMensagem, idUsuario, tipo) VALUES
+INSERT INTO reacao (dataHora, idMensagem, idUsuario, tipo) VALUES
 ('2023-01-01 10:05:00', 1, 2, 'curtir.png'),
 ('2023-01-02 11:05:00', 2, 1, 'curtir.png'),
 ('2023-01-03 12:05:00', 3, 1, 'olhos.png'),
-('2023-01-03 12:05:00', 6, 3, 'curioso.png');
+('2023-01-03 12:05:00', 6, 3, 'curioso.png'),
+('2023-01-04 12:10:00', 6, 1, 'curtir.png');
