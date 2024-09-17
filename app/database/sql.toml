@@ -59,3 +59,30 @@ mensagensDesc = """SELECT m.*, u.nome
                         AND m.id <= %s
                     ORDER BY id DESC
                     LIMIT %s;"""
+upsertReacaoMensagem = """
+                    INSERT INTO reacao (dataHora, idMensagem, idUsuario, tipo)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (idMensagem, idUsuario)
+                    DO UPDATE SET
+                        tipo = EXCLUDED.tipo,
+                        dataHora = EXCLUDED.dataHora;
+                        """
+validarAcessoUsuario = """
+                        -- Parametros: idQuadro, idQuadro, idUsuario
+                        SELECT
+                            u.nome,
+                            EXISTS (
+                                SELECT 1 FROM administradores a WHERE a.idUsuario = u.id
+                            ) AS eh_administrador,
+                            EXISTS (
+                                SELECT 1 FROM quadro q WHERE q.id = %s AND q.dono = u.id
+                            ) AS eh_dono_do_quadro,
+                            EXISTS (
+                                SELECT 1 FROM membrosQuadro mq WHERE mq.idUsuario = u.id  AND mq.aprovado = TRUE AND mq.idQuadro = %s
+                            ) AS eh_membro_do_quadro
+                        FROM
+                            usuario u
+                        WHERE
+                            u.id = %s;
+
+                    """

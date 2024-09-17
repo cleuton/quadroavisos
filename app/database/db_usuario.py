@@ -1,5 +1,6 @@
 from database.db_pool import get_connection, return_connection, sql
-from database.modelo import Usuario
+from database.modelo import Usuario, PerfilUsuarioQuadro
+
 
 def obter_usuario(id:int) -> Usuario:
     conn = None
@@ -20,7 +21,7 @@ def obter_usuario(id:int) -> Usuario:
             return None
     except Exception as e:
         print(f"Erro ao obter usuário: {id} : {e}")
-        return False
+        return None
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -47,7 +48,34 @@ def validar_usuario(email:str, password:str) -> Usuario:
             return None
     except Exception as e:
         print(f"Erro ao verificar usuário: {email} : {e}")
-        return False
+        return None
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+def verificar_direito_usuario(idUsuario: int, idQuadro: int) -> PerfilUsuarioQuadro:
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.validarAcessoUsuario, (idQuadro, idQuadro, idUsuario))
+        user = cursor.fetchone()
+
+        # Verificar se o usuário foi encontrado
+        if user:
+            return PerfilUsuarioQuadro(user[0], user[1], user[2], user[3])
+        else:
+            return None
+    except Exception as e:
+        print(f"Erro ao verificar perfil usuario quadro. IdUsuario: {idUsuario} idQuadro: {idQuadro}  : {e}")
+        return None
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:

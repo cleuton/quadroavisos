@@ -104,6 +104,7 @@ INSERT INTO quadro (nome, descricao, dono, publico) VALUES
 INSERT INTO membrosQuadro (idQuadro, idUsuario, aprovado) VALUES
 (2, 1, TRUE),
 (3, 3, TRUE),
+(3, 2, TRUE),
 (3, 5, FALSE),
 (4, 2, TRUE);
 

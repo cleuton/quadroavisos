@@ -1,11 +1,15 @@
 from datetime import datetime
+from datetime import date
 
 
 class Usuario:
-    def __init__(self, id, nome, dataNascimento, email, senha):
+    def __init__(self, id: int, nome: str, dataNascimento: date, email: str, senha: str):
         self.id = id
         self.nome = nome
-        self.dataNascimento = dataNascimento
+        if type(dataNascimento) != date:
+            self.dataNascimento = datetime.strptime(dataNascimento,'%Y-%m-%d').date()
+        else:
+            self.dataNascimento = dataNascimento
         self.email = email
         self.senha = senha
 
@@ -98,17 +102,24 @@ class MembrosQuadro:
         return self.id > other.id
 
 class Mensagem:
-    def __init__(self, id, idQuadro, idUsuario, nomeUsuario, dataHora, titulo, texto, anexo, expiraEm, icone):
+    def __init__(self, id: int, idQuadro: int, idUsuario: int , nomeUsuario: str, dataHora: datetime, titulo: str, texto: str, anexo: str, expiraEm: datetime, icone: str):
         self.id = id
         self.idQuadro = idQuadro
         self.idUsuario = idUsuario
         self.nomeUsuario = nomeUsuario
-        self.dataHora = dataHora
+        if type(dataHora) == str:
+            self.dataHora = datetime.strptime(dataHora,'%Y-%m-%d %H:%M:%S')
+        else:
+            self.dataHora = dataHora
         self.texto = texto
         self.anexo = anexo
         self.icone = icone
         self.titulo = titulo
-        self.expiraEm = expiraEm
+        if expiraEm != None:
+            if type(expiraEm) == str:
+                self.expiraEm = datetime.strptime(expiraEm,'%Y-%m-%d %H:%M:%S')
+        else:
+            self.expiraEm = expiraEm
 
     def __str__(self):
         return f"Mensagem(id={self.id}, idQuadro={self.idQuadro}, idUsuario={self.idUsuario}, dataHora={self.dataHora}, texto={self.texto}, anexo={self.anexo}, icone={self.icone})"
@@ -128,7 +139,7 @@ class Mensagem:
         return self.id > other.id
 
 class Reacao:
-    def __init__(self, id, dataHora, idMensagem, idUsuario, tipo):
+    def __init__(self, id: int, dataHora: datetime, idMensagem: int, idUsuario: int, tipo: str):
         self.id = id
         if type(dataHora) == str:
             self.dataHora = datetime.strptime(dataHora,'%Y-%m-%d %H:%M:%S')
@@ -156,13 +167,16 @@ class Reacao:
         return self.id > other.id
 
 class QuadroUltimaMensagem:
-    def __init__(self, id, nome, descricao, dono, publico, dataHora, icone, titulo):
+    def __init__(self, id: int, nome: str, descricao: str, dono: int, publico: bool , dataHora: datetime, icone: str, titulo: str):
         self.id = id
         self.nome = nome
         self.descricao = descricao
         self.dono = dono
         self.publico = publico
-        self.dataHora = dataHora
+        if type(dataHora) == str:
+            self.dataHora = datetime.strptime(dataHora, '%Y-%m-%d %H:%M:%S')
+        else:
+            self.dataHora = dataHora
         self.icone = icone
         self.titulo = titulo
 
@@ -175,6 +189,14 @@ class MensagemComReacoes:
     def __init__(self, mensagem: Mensagem, reacoes: [ReacaoAutor]):
         self.mensagem = mensagem
         self.reacoes = reacoes
+
+class PerfilUsuarioQuadro:
+    def __init__(self, nome: str, eh_administrador: bool, eh_dono_do_quadro: bool, eh_membro_do_quadro: bool):
+        self.nome = nome
+        self.eh_administrador = eh_administrador
+        self.eh_dono_do_quadro = eh_dono_do_quadro
+        self.eh_membro_do_quadro = eh_membro_do_quadro
+
 
 
 

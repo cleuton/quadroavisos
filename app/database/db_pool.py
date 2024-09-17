@@ -7,6 +7,11 @@ import toml
 
 connection_pool = None
 
+import locale
+
+# Defina o locale para Português do Brasil
+locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+
 # Criar a classe que vai armazenar as propriedades
 class SqlConfig:
     def __init__(self):
@@ -38,7 +43,8 @@ def cria_connection_pool():
             password=os.environ.get('DB_PASS', 'password'),
             host=os.environ.get('DB_HOST', 'localhost'),
             port=os.environ.get('DB_PORT', '5432'),
-            database=os.environ.get('DB_DATABASE', 'backend_db')
+            database=os.environ.get('DB_DATABASE', 'backend_db'),
+            options='-c timezone=America/Sao_Paulo'
         )
         print(f"""**** user {os.environ.get('DB_USER', 'postgres')} password {os.environ.get('DB_PASS', 'password')} host {os.environ.get('DB_HOST', 'localhost')} 
             port {os.environ.get('DB_PORT', '5432')} 

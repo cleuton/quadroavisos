@@ -1,10 +1,12 @@
+from datetime import datetime
 from typing import List
 from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Mensagem, MensagemComReacoes, Reacao, ReacaoAutor
+from database.db_usuario import verificar_direito_usuario
 
 
 # Obtém mensagem
-def obter_mensagem(id: int) -> Mensagem:
+def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
     conn = None
     cursor = None
     try:
@@ -16,9 +18,14 @@ def obter_mensagem(id: int) -> Mensagem:
         cursor.execute(sql.mensagem, (id,))
         mensagem = cursor.fetchone()
         if mensagem:
-            return Mensagem(mensagem[0], mensagem[1], mensagem[2], None, mensagem[3], mensagem[4], mensagem[5], mensagem[6], mensagem[7], mensagem[8])
+            msg = Mensagem(mensagem[0], mensagem[1], mensagem[2], None, mensagem[3], mensagem[4], mensagem[5], mensagem[6], mensagem[7], mensagem[8])
+            if not ver_perfil_usuario_quadro(idUsuario, msg.idQuadro):
+                raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+            return msg
         else:
             return None
+    except ValueError as v:
+        raise
     except Exception as e:
         print(f"Erro ao obter mensagem: {id} : {e}")
         return False
@@ -30,7 +37,7 @@ def obter_mensagem(id: int) -> Mensagem:
             return_connection(conn)
 
 # Obtém mensagem com reações
-def obter_mensagem_reacoes(id: int) -> MensagemComReacoes:
+def obter_mensagem_reacoes(id: int, idUsuario: int) -> MensagemComReacoes:
     conn = None
     cursor = None
     try:
@@ -44,7 +51,6 @@ def obter_mensagem_reacoes(id: int) -> MensagemComReacoes:
         inicio = True
         mensagemComReacoes = None
         if mcr:
-#id, idQuadro, idUsuario, nomeUsuario, dataHora, titulo, texto, anexo, expiraEm, icone
             mensagemComReacoes = MensagemComReacoes(
                 Mensagem(
                     mcr[0][0], #id
@@ -61,9 +67,13 @@ def obter_mensagem_reacoes(id: int) -> MensagemComReacoes:
             )
             for reacao in mcr:
                 mensagemComReacoes.reacoes.append(ReacaoAutor(Reacao(reacao[10], reacao[11], reacao[12], reacao[13], reacao[14]), reacao[15]))
+            if not ver_perfil_usuario_quadro(idUsuario, mensagemComReacoes.mensagem.idQuadro):
+                raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
             return mensagemComReacoes
         else:
             return None
+    except ValueError as v:
+        raise
     except Exception as e:
         print(f"Erro ao obter mensagem com reacoes: {id} : {e}")
         return False
@@ -75,7 +85,9 @@ def obter_mensagem_reacoes(id: int) -> MensagemComReacoes:
             return_connection(conn)
 
 # Carrega as mensagens para paginação, trazendo também o nome do autor
-def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int) -> List[Mensagem]:
+def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int, idUsuario: int) -> List[Mensagem]:
+    if not ver_perfil_usuario_quadro(idUsuario, quadroId):
+        raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
     conn = None
     cursor = None
     try:
@@ -99,3 +111,33 @@ def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int
             cursor.close()
         if conn:
             return_connection(conn)
+
+def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
+    if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
+        raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+        dataHora = datetime.now()
+        # Executar a consulta
+        cursor.execute(sql.upsertReacaoMensagem, (dataHora, idMensagem, idUsuario, tipo))
+    except Exception as e:
+        print(f"Erro ao reagir a mensagem: {idMensagem} usuario: {idUsuario} : {e}")
+        return False
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+def ver_perfil_usuario_quadro(idUsuario: int, idQuadro: int) -> bool:
+    resp = verificar_direito_usuario(idUsuario, idQuadro)
+    if resp is None:
+        return False
+    if resp.eh_administrador or resp.eh_dono_do_quadro or resp.eh_membro_do_quadro:
+        return True
+    return False

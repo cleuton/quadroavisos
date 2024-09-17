@@ -6,7 +6,7 @@ import os
 # Caminho para o diretório raiz do projeto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from testcontainers.postgres import PostgresContainer
-from database.db_usuario import validar_usuario, obter_usuario
+from database.db_usuario import validar_usuario, obter_usuario, verificar_direito_usuario
 from database.db_pool import reset_connection_pool
 
 class TestDbUsuario(unittest.TestCase):
@@ -78,7 +78,42 @@ class TestDbUsuario(unittest.TestCase):
     def test_obter_usuario_exception(self):
         # Testar obtenção de usuário com ID inválido que causa exceção
         user = obter_usuario("invalid_id")  # ID inválido que causa exceção
-        self.assertFalse(user)        
+        self.assertFalse(user)
+
+    def test_perfil_usuario_quadro(self):
+        # Usuario administrador
+        idUsuarioAdmin = 4
+        idQuadro = 3
+        resp = verificar_direito_usuario(idUsuarioAdmin, idQuadro)
+        self.assertTrue(resp.nome == 'Delmiro Admin')
+        self.assertTrue(resp.eh_administrador)
+        self.assertFalse(resp.eh_membro_do_quadro)
+        self.assertFalse(resp.eh_dono_do_quadro)
+
+        # Usuario dono do quadro
+        idUsuario = 1
+        idQuadro = 1
+        resp = verificar_direito_usuario(idUsuario, idQuadro)
+        self.assertTrue(resp.nome == 'Alice Silva')
+        self.assertFalse(resp.eh_administrador)
+        self.assertFalse(resp.eh_membro_do_quadro)
+        self.assertTrue(resp.eh_dono_do_quadro)
+
+        # Usuario nao tem direito algum
+        idUsuario = 5
+        idQuadro = 3
+        resp = verificar_direito_usuario(idUsuario, idQuadro)
+        self.assertTrue(resp.nome == 'Enésio não Aprovado')
+        self.assertFalse(resp.eh_administrador)
+        self.assertFalse(resp.eh_membro_do_quadro)
+        self.assertFalse(resp.eh_dono_do_quadro)
+
+        # Usuario inexistente
+        idUsuario = 15
+        idQuadro = 3
+        resp = verificar_direito_usuario(idUsuario, idQuadro)
+        self.assertTrue(resp is None)
+
 
 if __name__ == "__main__":
     unittest.main()
