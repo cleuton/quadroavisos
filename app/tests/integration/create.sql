@@ -127,3 +127,8 @@ INSERT INTO reacao (dataHora, idMensagem, idUsuario, tipo) VALUES
 ('2023-01-03 12:05:00', 3, 1, 'olhos.png'),
 ('2023-01-03 12:05:00', 6, 3, 'curioso.png'),
 ('2023-01-04 12:10:00', 6, 1, 'curtir.png');
+
+-- Muito importante para o upsert de reações:
+
+ALTER TABLE reacao
+ADD CONSTRAINT reacao_idMensagem_idUsuario_unique UNIQUE (idMensagem, idUsuario);

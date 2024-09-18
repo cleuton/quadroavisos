@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import strptime
 from typing import List
 from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Mensagem, MensagemComReacoes, Reacao, ReacaoAutor
@@ -124,8 +125,32 @@ def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
         dataHora = datetime.now()
         # Executar a consulta
         cursor.execute(sql.upsertReacaoMensagem, (dataHora, idMensagem, idUsuario, tipo))
+        conn.commit()
     except Exception as e:
         print(f"Erro ao reagir a mensagem: {idMensagem} usuario: {idUsuario} : {e}")
+        return False
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem):
+    if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
+        raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+        dataHora = datetime.now()
+        # Executar a consulta
+        cursor.execute(sql.cadastrarMensagem,(idQuadro, idUsuario, msg.dataHora.strftime('%Y-%m-%d %H:%M:%S'), msg.titulo, msg.texto, msg.anexo, msg.expiraEm.strftime('%Y-%m-%d %H:%M:%S'), msg.icone))
+        conn.commit()
+    except Exception as e:
+        print(f"Erro ao cadastrar a mensagem: {msg} usuario: {idUsuario} quadro: {idQuadro} : {e}")
         return False
     finally:
         # Fechar o cursor e devolver a conexão ao pool

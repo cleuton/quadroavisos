@@ -118,6 +118,8 @@ class Mensagem:
         if expiraEm != None:
             if type(expiraEm) == str:
                 self.expiraEm = datetime.strptime(expiraEm,'%Y-%m-%d %H:%M:%S')
+            else:
+                self.expiraEm = expiraEm
         else:
             self.expiraEm = expiraEm
 

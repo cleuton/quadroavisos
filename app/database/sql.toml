@@ -84,5 +84,8 @@ validarAcessoUsuario = """
                             usuario u
                         WHERE
                             u.id = %s;
-
+                    """
+cadastrarMensagem = """
+                    INSERT INTO mensagem (idQuadro, idUsuario, dataHora, titulo, texto, anexo, expiraEm, icone) VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s);
                     """

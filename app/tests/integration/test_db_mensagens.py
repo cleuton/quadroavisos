@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import sys
 import os
@@ -6,9 +7,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 print(f"SYS PATH: ****** {sys.path}")
 from testcontainers.postgres import PostgresContainer
-from database.db_mensagens import listar_mensagens_desc, obter_mensagem, obter_mensagem_reacoes, reagir
+from database.db_mensagens import listar_mensagens_desc, obter_mensagem, obter_mensagem_reacoes, reagir, cadastrar_mensagem
 from database.db_pool import reset_connection_pool
-from database.modelo import Reacao, ReacaoAutor
+from database.modelo import Reacao, ReacaoAutor, Mensagem
 import os
 
 class TestMensagens(unittest.TestCase):
@@ -148,7 +149,7 @@ class TestMensagens(unittest.TestCase):
         self.assertEqual(str(context.exception), "Usuario nao tem permissao para acessar essa mensagem")
 
 
-    def reagir_mensagem(self):
+    def test_reagir_mensagem(self):
         # Nao existe reacao deste usuario a esta mensagem:
         id_mensagem = 4
         id_usuario = 2
@@ -177,5 +178,21 @@ class TestMensagens(unittest.TestCase):
             reagir(id_mensagem, id_usuario, id_quadro, 'curious.png')
         self.assertEqual(str(context.exception), "Usuario nao tem permissao para acessar essa mensagem")
 
+    def test_cadastrar_mensagem(self):
+        # Usuario eh dono do quadro:
+        idQuadro = 3
+        idUsuario = 2
+        novaMsgId = 9 # Atencao: Isso só funciona se você manter o mesmo create.sql dos testes!!!!
+        msg = Mensagem(0, idQuadro, idUsuario, "", datetime.datetime.now(), "mensagem ok", "texto mensagem ok", "anexo.png", datetime.datetime.now(), "atencao.png")
+        cadastrar_mensagem(idUsuario, idQuadro, msg)
+        msg = obter_mensagem(novaMsgId, 2)
+        self.assertTrue(msg.titulo == "mensagem ok")
+        self.assertTrue(msg.texto == "texto mensagem ok")
+        self.assertTrue(msg.idUsuario == 2)
+        self.assertTrue(msg.idQuadro == 3)
+        self.assertFalse(msg.expiraEm is None)
+        self.assertTrue(msg.expiraEm == msg.dataHora)
+        self.assertTrue(msg.anexo == "anexo.png")
+        self.assertTrue(msg.icone == "atencao.png")
 
 
