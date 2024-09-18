@@ -83,3 +83,12 @@ def verificar_direito_usuario(idUsuario: int, idQuadro: int) -> PerfilUsuarioQua
         if conn:
             return_connection(conn)
 
+def ver_perfil_usuario_quadro(idUsuario: int, idQuadro: int) -> bool:
+    resp = verificar_direito_usuario(idUsuario, idQuadro)
+    if resp is None:
+        return False
+    if resp.eh_administrador or resp.eh_dono_do_quadro or resp.eh_membro_do_quadro:
+        return True
+    return False
+
+

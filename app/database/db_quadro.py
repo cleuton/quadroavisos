@@ -1,11 +1,13 @@
 from typing import List, Optional
 from database.db_pool import get_connection, return_connection, sql
-from database.modelo import Quadro, QuadroUltimaMensagem
+from database.modelo import Quadro, QuadroUltimaMensagem, QuadroComDono
 from database.db_admins import eh_admin
-
+from database.db_usuario import ver_perfil_usuario_quadro
 
 # Retorna um Quadro independentemente do usuário ser membro ou administrador
-def obter_quadro(id:int) -> Quadro:
+def obter_quadro(id:int, idUsuario: int) -> Quadro:
+    if not ver_perfil_usuario_quadro(idUsuario, id):
+        raise ValueError("Usuario nao tem permissao para acessar esse quadro")
     conn = None
     cursor = None
     try:
@@ -91,3 +93,57 @@ def _quadros_por_usuario(cursor, idUsuario):
         return [QuadroUltimaMensagem(q[0], q[1], q[2], q[3], q[4], q[5], q[6], q[7]) for q in quadros]
     else:
         return None
+
+# Só administradores podem criar quadros
+def criar_quadro(idUsuario: int, quadro: Quadro):
+    if not eh_admin(idUsuario):
+        raise ValueError("Usuario sem permissao")
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.criarQuadro, (quadro.nome, quadro.descricao, quadro.dono, quadro.publico))
+        conn.commit()
+    except Exception as e:
+        print(f"Erro ao criar quadro: {quadro} : {e}")
+        return False
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+# Lista os quadros encontrados, sem última mensagem, baseados no título do quadro e na pesquisa
+# Traz o nome do dono do quadro
+def listar_filtrar_quadro(pesquisa: str) -> List[QuadroComDono]:
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executa a consulta
+        cursor.execute(sql.listarFiltrarQuadros, (f"%{pesquisa}%",))
+        quadros = cursor.fetchall()
+
+        # Verificar se os quadros foram encontrados
+        if quadros:
+            return [QuadroComDono(Quadro(q[0], q[1], q[2], q[3], q[4]), q[5]) for q in quadros]
+        else:
+            return []
+    except Exception as e:
+        print(f"Erro ao listar / filtrar quadros: {pesquisa} : {e}")
+        return False
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+

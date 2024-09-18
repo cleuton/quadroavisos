@@ -199,6 +199,11 @@ class PerfilUsuarioQuadro:
         self.eh_dono_do_quadro = eh_dono_do_quadro
         self.eh_membro_do_quadro = eh_membro_do_quadro
 
+class QuadroComDono:
+    def __init__(self, quadro: Quadro, nomeDono: str):
+        self.quadro = quadro
+        self.nomeDono = nomeDono
+
 
 
 

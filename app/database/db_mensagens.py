@@ -3,8 +3,7 @@ from time import strptime
 from typing import List
 from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Mensagem, MensagemComReacoes, Reacao, ReacaoAutor
-from database.db_usuario import verificar_direito_usuario
-
+from database.db_usuario import ver_perfil_usuario_quadro
 
 # Obtém mensagem
 def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
@@ -159,10 +158,3 @@ def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem):
         if conn:
             return_connection(conn)
 
-def ver_perfil_usuario_quadro(idUsuario: int, idQuadro: int) -> bool:
-    resp = verificar_direito_usuario(idUsuario, idQuadro)
-    if resp is None:
-        return False
-    if resp.eh_administrador or resp.eh_dono_do_quadro or resp.eh_membro_do_quadro:
-        return True
-    return False

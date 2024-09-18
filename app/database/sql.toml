@@ -89,3 +89,14 @@ cadastrarMensagem = """
                     INSERT INTO mensagem (idQuadro, idUsuario, dataHora, titulo, texto, anexo, expiraEm, icone) VALUES
                     (%s, %s, %s, %s, %s, %s, %s, %s);
                     """
+criarQuadro = """
+                INSERT INTO quadro (nome, descricao, dono, publico) VALUES
+                    (%s, %s, %s, %s);
+                """
+listarFiltrarQuadros = """
+                SELECT Q.*, U.nome from quadro Q
+                    INNER JOIN usuario U
+                        on U.id = Q.dono
+                    WHERE Q.nome ILIKE %s
+                    ORDER BY Q.nome;
+                """

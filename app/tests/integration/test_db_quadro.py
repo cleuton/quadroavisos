@@ -6,8 +6,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 print(f"SYS PATH: ****** {sys.path}")
 from testcontainers.postgres import PostgresContainer
-from database.db_quadro import obter_quadros_usuario
+from database.db_quadro import obter_quadros_usuario, criar_quadro, obter_quadro, listar_filtrar_quadro
 from database.db_pool import reset_connection_pool
+from database.modelo import Quadro
 import os
 
 class TestDbQuadro(unittest.TestCase):
@@ -92,6 +93,29 @@ class TestDbQuadro(unittest.TestCase):
         self.assertTrue(quadro_publico.descricao == 'Quadro para anúncios gerais')
         self.assertFalse(quadro_publico.titulo is None)
         self.assertTrue(quadro_publico.titulo == 'Novo evento')
+
+    def test_criar_quadro(self):
+        idUsuario = 4 # Atencao: Depende do create.sql do teste
+        quadro = Quadro(0, 'Novo quadro criado agora', 'Descrição do novo quadro', 3, False)
+        criar_quadro(idUsuario, quadro)
+        idNovoQuadro = 5 # Atencao: Depende do create.sql do teste!!!!
+        q2 = obter_quadro(5, 3)
+        self.assertFalse(q2 is None)
+        self.assertTrue(q2.id == idNovoQuadro)
+        self.assertTrue(q2.nome == 'Novo quadro criado agora')
+        self.assertTrue(q2.descricao == 'Descrição do novo quadro')
+        self.assertTrue(q2.dono == 3)
+        self.assertTrue(q2.publico == False)
+
+    def test_listar_filtrar_quadro(self):
+        pesquisa = 'projetos'
+        quadros = listar_filtrar_quadro(pesquisa)
+        self.assertTrue(len(quadros) == 2)
+        self.assertTrue(quadros[0].quadro.id == 2)
+        self.assertTrue(quadros[0].nomeDono == 'Bob Santos')
+        self.assertTrue(quadros[1].quadro.id == 4)
+        self.assertTrue(quadros[1].nomeDono == 'Alice Silva')
+
 
 if __name__ == "__main__":
     unittest.main()
