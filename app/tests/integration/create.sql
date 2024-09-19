@@ -3,7 +3,8 @@ CREATE TABLE usuario (
     nome VARCHAR(255) NOT NULL,
     dataNascimento DATE NOT NULL,
     email VARCHAR(255) NOT NULL,
-    senha VARCHAR(255) NOT NULL
+    senha VARCHAR(255) NOT NULL,
+    CONSTRAINT unique_usuario UNIQUE (nome, dataNascimento, email)
 );
 CREATE INDEX idx_usuario_nome ON usuario(nome);
 CREATE INDEX idx_usuario_email ON usuario(email);

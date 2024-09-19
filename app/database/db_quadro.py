@@ -3,10 +3,16 @@ from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Quadro, QuadroUltimaMensagem, QuadroComDono
 from database.db_admins import eh_admin
 from database.db_usuario import ver_perfil_usuario_quadro
+import logging
+
+logger = logging.getLogger("backend")
 
 # Retorna um Quadro independentemente do usuário ser membro ou administrador
 def obter_quadro(id:int, idUsuario: int) -> Quadro:
+    flog = f"{__file__}::obter_quadro;"
     if not ver_perfil_usuario_quadro(idUsuario, id):
+        mensagem = f"Usuario: {idUsuario} nao tem permissao para acessar esse quadro: {id}"
+        logger.error(f"{flog} {mensagem}")
         raise ValueError("Usuario nao tem permissao para acessar esse quadro")
     conn = None
     cursor = None
@@ -25,8 +31,9 @@ def obter_quadro(id:int, idUsuario: int) -> Quadro:
         else:
             return None
     except Exception as e:
-        print(f"Erro ao obter quadro: {id} : {e}")
-        return False
+        mensagem = f"Erro ao obter quadro: {id} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -37,6 +44,7 @@ def obter_quadro(id:int, idUsuario: int) -> Quadro:
 # Retorna a lista de Quadros considerando o perfil do usuário (membro, dono ou administrador)
 # Se o idUsuario não for informado ou for 0, retorna todos os quadros públicos
 def obter_quadros_usuario(idUsuario: Optional[int]) -> List[QuadroUltimaMensagem]:
+    flog = f"{__file__}::obter_quadros_usuario;"
     conn = None
     cursor = None
     try:
@@ -58,8 +66,9 @@ def obter_quadros_usuario(idUsuario: Optional[int]) -> List[QuadroUltimaMensagem
         return _quadros_por_usuario(cursor, idUsuario)
 
     except Exception as e:
-        print(f"Erro ao obter quadros do usuário: {idUsuario} : {e}")
-        return None
+        mensagem = f"Erro ao obter quadros do usuário: {idUsuario} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -96,7 +105,10 @@ def _quadros_por_usuario(cursor, idUsuario):
 
 # Só administradores podem criar quadros
 def criar_quadro(idUsuario: int, quadro: Quadro):
+    flog = f"{__file__}::criar_quadro;"
     if not eh_admin(idUsuario):
+        mensagem = f"Usuario: {idUsuario} nao eh administrador"
+        logger.error(f"{flog} {mensagem}")
         raise ValueError("Usuario sem permissao")
     conn = None
     cursor = None
@@ -109,8 +121,9 @@ def criar_quadro(idUsuario: int, quadro: Quadro):
         cursor.execute(sql.criarQuadro, (quadro.nome, quadro.descricao, quadro.dono, quadro.publico))
         conn.commit()
     except Exception as e:
-        print(f"Erro ao criar quadro: {quadro} : {e}")
-        return False
+        mensagem = f"Erro ao criar quadro: {quadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -121,6 +134,7 @@ def criar_quadro(idUsuario: int, quadro: Quadro):
 # Lista os quadros encontrados, sem última mensagem, baseados no título do quadro e na pesquisa
 # Traz o nome do dono do quadro
 def listar_filtrar_quadro(pesquisa: str) -> List[QuadroComDono]:
+    flog = f"{__file__}::listar_filtrar_quadro;"
     conn = None
     cursor = None
     try:
@@ -138,8 +152,9 @@ def listar_filtrar_quadro(pesquisa: str) -> List[QuadroComDono]:
         else:
             return []
     except Exception as e:
-        print(f"Erro ao listar / filtrar quadros: {pesquisa} : {e}")
-        return False
+        mensagem = f"Erro ao listar / filtrar quadros: {pesquisa} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:

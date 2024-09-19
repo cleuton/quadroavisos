@@ -4,9 +4,13 @@ from typing import List
 from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Mensagem, MensagemComReacoes, Reacao, ReacaoAutor
 from database.db_usuario import ver_perfil_usuario_quadro
+import logging
+
+logger = logging.getLogger("backend")
 
 # Obtém mensagem
 def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
+    flog = f"{__file__}::obter_mensagem;"
     conn = None
     cursor = None
     try:
@@ -20,15 +24,18 @@ def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
         if mensagem:
             msg = Mensagem(mensagem[0], mensagem[1], mensagem[2], None, mensagem[3], mensagem[4], mensagem[5], mensagem[6], mensagem[7], mensagem[8])
             if not ver_perfil_usuario_quadro(idUsuario, msg.idQuadro):
-                raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+                mensagem = "Usuario nao tem permissao para acessar essa mensagem"
+                logger.error(f"{flog}{mensagem}")
+                raise ValueError(mensagem)
             return msg
         else:
             return None
     except ValueError as v:
         raise
     except Exception as e:
-        print(f"Erro ao obter mensagem: {id} : {e}")
-        return False
+        mensagem = f"Erro ao obter mensagem: {id} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -38,6 +45,7 @@ def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
 
 # Obtém mensagem com reações
 def obter_mensagem_reacoes(id: int, idUsuario: int) -> MensagemComReacoes:
+    flog = f"{__file__}::obter_mensagem_reacoes;"
     conn = None
     cursor = None
     try:
@@ -68,15 +76,18 @@ def obter_mensagem_reacoes(id: int, idUsuario: int) -> MensagemComReacoes:
             for reacao in mcr:
                 mensagemComReacoes.reacoes.append(ReacaoAutor(Reacao(reacao[10], reacao[11], reacao[12], reacao[13], reacao[14]), reacao[15]))
             if not ver_perfil_usuario_quadro(idUsuario, mensagemComReacoes.mensagem.idQuadro):
-                raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+                mensagem = "Usuario nao tem permissao para acessar essa mensagem"
+                logger.error(f"{flog}{mensagem}")
+                raise ValueError(mensagem)
             return mensagemComReacoes
         else:
             return None
     except ValueError as v:
         raise
     except Exception as e:
-        print(f"Erro ao obter mensagem com reacoes: {id} : {e}")
-        return False
+        mensagem = f"Erro ao obter mensagem com reacoes: {id} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -86,8 +97,11 @@ def obter_mensagem_reacoes(id: int, idUsuario: int) -> MensagemComReacoes:
 
 # Carrega as mensagens para paginação, trazendo também o nome do autor
 def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int, idUsuario: int) -> List[Mensagem]:
+    flog = f"{__file__}::listar_mensagens_desc;"
     if not ver_perfil_usuario_quadro(idUsuario, quadroId):
-        raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+        mensagem = "Usuario nao tem permissao para acessar essa mensagem"
+        logger.error(f"{flog}{mensagem}")
+        raise ValueError(mensagem)
     conn = None
     cursor = None
     try:
@@ -101,10 +115,11 @@ def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int
         if mensagens:
             return [Mensagem(m[0], m[1], m[2], m[9], m[3], m[4], m[5], m[6], m[7], m[8]) for m in mensagens]
         else:
-            return None
+            return []
     except Exception as e:
-        print(f"Erro ao obter mensagens para o quadro: {quadroId} : {e}")
-        return False
+        mensagem = f"Erro ao listar mensagens: {quadroId} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -113,8 +128,11 @@ def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int
             return_connection(conn)
 
 def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
+    flog = f"{__file__}::listar_mensagens_desc;"
     if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
-        raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+        mensagem = "Usuario nao tem permissao para acessar essa mensagem"
+        logger.error(f"{flog}{mensagem}")
+        raise ValueError(mensagem)
     conn = None
     cursor = None
     try:
@@ -126,8 +144,9 @@ def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
         cursor.execute(sql.upsertReacaoMensagem, (dataHora, idMensagem, idUsuario, tipo))
         conn.commit()
     except Exception as e:
-        print(f"Erro ao reagir a mensagem: {idMensagem} usuario: {idUsuario} : {e}")
-        return False
+        mensagem = f"Erro ao reagir a mensagem: {idMensagem} usuario: {idUsuario} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:
@@ -136,8 +155,11 @@ def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
             return_connection(conn)
 
 def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem):
+    flog = f"{__file__}::cadastrar_mensagem;"
     if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
-        raise ValueError("Usuario nao tem permissao para acessar essa mensagem")
+        mensagem = "Usuario nao tem permissao para acessar essa mensagem"
+        logger.error(f"{flog}{mensagem}")
+        raise ValueError(mensagem)
     conn = None
     cursor = None
     try:
@@ -149,8 +171,9 @@ def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem):
         cursor.execute(sql.cadastrarMensagem,(idQuadro, idUsuario, msg.dataHora.strftime('%Y-%m-%d %H:%M:%S'), msg.titulo, msg.texto, msg.anexo, msg.expiraEm.strftime('%Y-%m-%d %H:%M:%S'), msg.icone))
         conn.commit()
     except Exception as e:
-        print(f"Erro ao cadastrar a mensagem: {msg} usuario: {idUsuario} quadro: {idQuadro} : {e}")
-        return False
+        mensagem = f"Erro ao cadastrar a mensagem: {msg} usuario: {idUsuario} quadro: {idQuadro} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:

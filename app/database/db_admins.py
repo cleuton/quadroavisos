@@ -1,8 +1,12 @@
 from database.db_pool import get_connection, return_connection
 from database.modelo import Administradores
+import logging
+
+logger = logging.getLogger("backend")
 
 # Retorna se um usuário é Administrador
 def eh_admin(id:int) -> bool:
+    flog = f"{__file__}::eh_admin;"
     conn = None
     cursor = None
     try:
@@ -20,8 +24,9 @@ def eh_admin(id:int) -> bool:
         else:
             return False
     except Exception as e:
-        print(f"Erro ao obter admin para: {id} : {e}")
-        return False
+        mensagem = f"Erro ao obter admin para: {id} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
     finally:
         # Fechar o cursor e devolver a conexão ao pool
         if cursor:

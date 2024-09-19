@@ -2,10 +2,14 @@ import psycopg2
 from psycopg2 import pool
 import os
 import toml
+import logging
+
+logger = logging.getLogger("backend")
 
 # Cria o pool de conexões globalmente com parâmetros adequados
 
 connection_pool = None
+
 
 import locale
 
@@ -34,22 +38,24 @@ sql.carregar_propriedades(os.path.join(os.path.dirname(os.path.abspath(__file__)
 sql.imprimir_dicionario()
 
 def cria_connection_pool():
+    flog = f"{__file__}::cria_connection_pool;"
     global connection_pool
-    if connection_pool is None:
-        connection_pool = psycopg2.pool.SimpleConnectionPool(
-            minconn=1,  # Número mínimo de conexões no pool
-            maxconn=20,  # Número máximo de conexões no pool
-            user=os.environ.get('DB_USER', 'postgres'),
-            password=os.environ.get('DB_PASS', 'password'),
-            host=os.environ.get('DB_HOST', 'localhost'),
-            port=os.environ.get('DB_PORT', '5432'),
-            database=os.environ.get('DB_DATABASE', 'backend_db'),
-            options='-c timezone=America/Sao_Paulo'
-        )
-        print(f"""**** user {os.environ.get('DB_USER', 'postgres')} password {os.environ.get('DB_PASS', 'password')} host {os.environ.get('DB_HOST', 'localhost')} 
-            port {os.environ.get('DB_PORT', '5432')} 
-            database {os.environ.get('DB_DATABASE', 'backend_db')}
-        """)
+    try:
+        if connection_pool is None:
+            connection_pool = psycopg2.pool.SimpleConnectionPool(
+                minconn=1,  # Número mínimo de conexões no pool
+                maxconn=20,  # Número máximo de conexões no pool
+                user=os.environ.get('DB_USER', 'postgres'),
+                password=os.environ.get('DB_PASS', 'password'),
+                host=os.environ.get('DB_HOST', 'localhost'),
+                port=os.environ.get('DB_PORT', '5432'),
+                database=os.environ.get('DB_DATABASE', 'backend_db'),
+                options='-c timezone=America/Sao_Paulo'
+            )
+    except (Exception, psycopg2.DatabaseError) as error:
+        mensagem = f"Erro ao tentar obter connection pool! {error}"
+        logger.error(f"{flog}{mensagem}")
+        raise
 
 # Função para pegar uma conexão do pool
 def get_connection():

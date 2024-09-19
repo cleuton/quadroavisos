@@ -2,12 +2,15 @@ import unittest
 
 import sys
 import os
+from datetime import datetime
 
 # Caminho para o diretório raiz do projeto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from testcontainers.postgres import PostgresContainer
-from database.db_usuario import validar_usuario, obter_usuario, verificar_direito_usuario
+from database.db_usuario import validar_usuario, obter_usuario, verificar_direito_usuario, cadastrar_usuario, \
+    atualizar_usuario, deletar_usuario, listar_usuarios
 from database.db_pool import reset_connection_pool
+from database.modelo import Usuario
 
 class TestDbUsuario(unittest.TestCase):
 
@@ -77,8 +80,8 @@ class TestDbUsuario(unittest.TestCase):
 
     def test_obter_usuario_exception(self):
         # Testar obtenção de usuário com ID inválido que causa exceção
-        user = obter_usuario("invalid_id")  # ID inválido que causa exceção
-        self.assertFalse(user)
+        with self.assertRaises(Exception) as context:
+            user = obter_usuario("invalid_id")  # ID inválido que causa exceção
 
     def test_perfil_usuario_quadro(self):
         # Usuario administrador
@@ -114,6 +117,65 @@ class TestDbUsuario(unittest.TestCase):
         resp = verificar_direito_usuario(idUsuario, idQuadro)
         self.assertTrue(resp is None)
 
+    def test_cadastrar_atualizar_deletar_usuario(self):
+        # Criar um novo usuario
+        idUsuario = 6 # Id novo usuario. Depende do script create.sql do teste!!!!!
+        usuario = Usuario(0, 'fulano de tal', datetime.strptime('1970-04-10', '%Y-%m-%d').date(),
+                          'fulano@teste.com', 'senha123')
+        cadastrar_usuario(usuario)
+        usuario_db = obter_usuario(idUsuario)
+        self.assertFalse(usuario_db is None)
+        self.assertEqual(usuario_db.nome, usuario.nome)
+        self.assertEqual(usuario_db.email, usuario.email)
+        self.assertEqual(usuario_db.senha, usuario.senha)
+        self.assertEqual(usuario_db.dataNascimento, usuario.dataNascimento)
+
+        # Cadastrar usuário já existente
+        usuario = Usuario(0, 'fulano de tal', datetime.strptime('1970-04-10', '%Y-%m-%d').date(),
+                          'fulano@teste.com', 'sdfdfdfdfdenha123')
+        with self.assertRaises(ValueError) as context:
+            cadastrar_usuario(usuario)
+        self.assertEqual(str(context.exception), f"Erro de integridade ao inserir usuário: {usuario}")
+
+        # Atualizar um usuario
+        usuario.id = idUsuario
+        usuario.nome = 'Novo nome'
+        usuario.email = 'novo@email'
+        usuario.senha = '<PASSWORD>'
+        usuario.dataNascimento = datetime.strptime('1971-05-14', '%Y-%m-%d').date()
+        atualizar_usuario(idUsuario, usuario)
+        usuario_db = obter_usuario(idUsuario)
+        self.assertFalse(usuario_db is None)
+        self.assertEqual(usuario_db.nome, usuario.nome)
+        self.assertEqual(usuario_db.email, usuario.email)
+        self.assertEqual(usuario_db.dataNascimento, usuario.dataNascimento)
+
+        # Atualizar usuario inexistente:
+        usuario = Usuario(0, 'fulano de tal', datetime.strptime('1970-04-10', '%Y-%m-%d').date(),
+                          'fulano@teste.com', 'sdfdfdfdfdenha123')
+        with self.assertRaises(ValueError) as context:
+            atualizar_usuario(0,usuario)
+        self.assertEqual(str(context.exception), "Atualizar Usuario inexistente!")
+
+        # Deletar um usuario
+        deletar_usuario(idUsuario)
+        usuario_db = obter_usuario(idUsuario)
+        self.assertTrue(usuario_db is None)
+
+        # Deletar um usuario inexistente
+        with self.assertRaises(ValueError) as context:
+            deletar_usuario(0)
+        self.assertEqual(str(context.exception), "Deletar Usuario inexistente!")
+
+    def test_listar_filtrar_usuarios(self):
+
+        # Listagem bem sucedida
+        idUsuario = 4 # Admin! Depende do script create.sql dos testes!!!!!
+        pesquisa = 'os' # Deve listar 2: Bob Santos e Carlos Pereira
+        usuarios = listar_usuarios(idUsuario, pesquisa)
+        self.assertTrue(len(usuarios) == 2)
+        self.assertEqual(usuarios[0].nome, 'Bob Santos')
+        self.assertEqual(usuarios[1].nome, 'Carlos Pereira')
 
 if __name__ == "__main__":
     unittest.main()
