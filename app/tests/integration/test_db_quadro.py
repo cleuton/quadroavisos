@@ -6,9 +6,10 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 print(f"SYS PATH: ****** {sys.path}")
 from testcontainers.postgres import PostgresContainer
-from database.db_quadro import obter_quadros_usuario, criar_quadro, obter_quadro, listar_filtrar_quadro
+from database.db_quadro import obter_quadros_usuario, criar_quadro, obter_quadro, listar_filtrar_quadro, \
+    solicitar_membro_quadro, remover_membro_quadro, listar_membros_quadro, aprovar_membro_quadro
 from database.db_pool import reset_connection_pool
-from database.modelo import Quadro
+from database.modelo import Quadro, MembrosQuadro
 import os
 
 class TestDbQuadro(unittest.TestCase):
@@ -115,6 +116,46 @@ class TestDbQuadro(unittest.TestCase):
         self.assertTrue(quadros[0].nomeDono == 'Bob Santos')
         self.assertTrue(quadros[1].quadro.id == 4)
         self.assertTrue(quadros[1].nomeDono == 'Alice Silva')
+
+    def test_membros_quadro(self):
+
+        # Insere solicitação de aprovação
+        idQuadro = 2
+        idUsuario = 3
+        idDono = 2
+        solicitar_membro_quadro(idUsuario, idQuadro)
+        membros = listar_membros_quadro(idDono,idQuadro)
+        self.assertTrue(len(membros) == 2)
+        self.assertTrue(membros[0].idUsuario == 3)
+        self.assertFalse(membros[0].aprovado)
+        guardar_membro_quadro = membros[0]
+
+        # Aprova usuário
+        aprovar_membro_quadro(idDono, membros[0])
+        membros = listar_membros_quadro(idDono,idQuadro)
+        self.assertTrue(len(membros) == 2)
+        self.assertTrue(membros[1].idUsuario == 3)
+        self.assertTrue(membros[1].aprovado)
+
+        # Remove membro do quadro
+        remover_membro_quadro(idDono, membros[1])
+        membros = listar_membros_quadro(idDono,idQuadro)
+        self.assertTrue(len(membros) == 1)
+
+        # Tenta aprovar usuário que não é membro do quadro
+        with self.assertRaises(ValueError):
+            aprovar_membro_quadro(idDono, guardar_membro_quadro)
+
+        # Tenta aprovar usuario sem ser dono do quadro
+        with self.assertRaises(ValueError):
+            aprovar_membro_quadro(1, guardar_membro_quadro)
+            
+        # Tenta listar membros sem ser admin ou membro do quadro
+        with self.assertRaises(ValueError):
+            listar_membros_quadro(1, idQuadro)
+
+
+
 
 
 if __name__ == "__main__":

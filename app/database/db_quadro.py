@@ -1,8 +1,8 @@
 from typing import List, Optional
 from database.db_pool import get_connection, return_connection, sql
-from database.modelo import Quadro, QuadroUltimaMensagem, QuadroComDono
+from database.modelo import Quadro, QuadroUltimaMensagem, QuadroComDono, PerfilUsuarioQuadro, MembrosQuadro
 from database.db_admins import eh_admin
-from database.db_usuario import ver_perfil_usuario_quadro
+from database.db_usuario import ver_perfil_usuario_quadro, verificar_direito_usuario
 import logging
 
 logger = logging.getLogger("backend")
@@ -162,3 +162,148 @@ def listar_filtrar_quadro(pesquisa: str) -> List[QuadroComDono]:
         if conn:
             return_connection(conn)
 
+# Um usuário pode solicitar para ser membro de um quadro, mas deve ser aprovado pelo dono posteriormente
+def solicitar_membro_quadro(idUsuario: int, idQuadro: int):
+    flog = f"{__file__}::solicitar_membro_quadro;"
+    perfil = ver_perfil_usuario_quadro(idUsuario, idQuadro)
+    if perfil is None:
+        mensagem = f"Usuario: {idUsuario} não encontrado pedindo acesso ao quadro: {idQuadro}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    if perfil:
+        mensagem = f"Usuario: {idUsuario} já é administrador, dono ou membro do quadro: {idQuadro}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.inserirMembroQuadro, (idQuadro, idUsuario,))
+        conn.commit()
+    except Exception as e:
+        mensagem = f"Erro ao tornar o usuario: {idUsuario} membro do quadro: {idQuadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+# Somente o dono de um quadro pode remover usuários de serem membros dele
+def remover_membro_quadro(idUsuario: int, membrosQuadro: MembrosQuadro):
+    flog = f"{__file__}::remover_membro_quadro;"
+    perfil = verificar_direito_usuario(idUsuario, membrosQuadro.idQuadro)
+    if perfil is None:
+        mensagem = f"Usuario: {idUsuario} dono do quadro não encontrado para remover um usuário do quadro: {membrosQuadro.idQuadro}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    if not perfil.eh_dono_do_quadro:
+        mensagem = f"Usuario: {idUsuario} não é dono do quadro {membrosQuadro.idQuadro} e pede a remoção do usuário: {membrosQuadro.idUsuario}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.removerMembroQuadro, (membrosQuadro.idQuadro, membrosQuadro.idUsuario,))
+        conn.commit()
+    except Exception as e:
+        mensagem = f"Erro ao remover o usuario: {membrosQuadro.idUsuario} de membro do quadro: {membrosQuadro.idQuadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+# O dono do quadro ou um administrador podem solicitar a lista de membros de um quadro
+def listar_membros_quadro(idUsuario, idQuadro) -> List[MembrosQuadro]:
+    flog = f"{__file__}::listar_membros_quadro;"
+    perfil = verificar_direito_usuario(idUsuario, idQuadro)
+    if perfil is None:
+        mensagem = f"Usuario: {idUsuario} não encontrado para listar membros do quadro: {idQuadro}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    if (not perfil.eh_administrador) and not (perfil.eh_dono_do_quadro):
+        mensagem = f"Usuario: {idUsuario} não é dono do quadro {idQuadro} e nem administrador e pede a listagem dos membros do quadro: {idUsuario}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.listarMembrosQuadro, (idQuadro,))
+        membros = cursor.fetchall()
+        if membros:
+            return [MembrosQuadro(m[0], m[1], m[2], m[3], m[4]) for m in membros]
+        else:
+            return []
+    except Exception as e:
+        mensagem = f"Erro ao listar membros do quadro: {idQuadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+# Somente o dono de um quadro pode aprovar usuários a serem membros dele
+def aprovar_membro_quadro(idUsuario: int, membrosQuadro: MembrosQuadro):
+    flog = f"{__file__}::aprovar_membro_quadro;"
+    perfil = verificar_direito_usuario(idUsuario, membrosQuadro.idQuadro)
+    if perfil is None:
+        mensagem = f"Usuario: {idUsuario} dono do quadro não encontrado para aprovar um usuário membro do quadro: {membrosQuadro.idQuadro}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    if not perfil.eh_dono_do_quadro:
+        mensagem = f"Usuario: {idUsuario} não é dono do quadro {membrosQuadro.idQuadro} para aprovar o usuário: {membrosQuadro.idUsuario} como membro do quadro"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+    if membrosQuadro.aprovado:
+        mensagem = f"Usuario: {idUsuario} já é membro aprovado do quadro: {membrosQuadro.idQuadro}"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError(mensagem)
+
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.aprovarMembroQuadro, (membrosQuadro.idQuadro, membrosQuadro.idUsuario,))
+        afetados = cursor.rowcount
+        if afetados != 1:
+            mensagem = f"Usuario: {membrosQuadro.idUsuario} não consta como tendo solicitado acesso ao quadro: {membrosQuadro.idQuadro}"
+            logger.error(f"{flog} {mensagem}")
+            raise ValueError(mensagem)
+        conn.commit()
+    except Exception as e:
+        mensagem = f"Erro ao aprovar o usuario: {membrosQuadro.idUsuario} como membro do quadro: {membrosQuadro.idQuadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)

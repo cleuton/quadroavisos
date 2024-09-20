@@ -78,11 +78,12 @@ class Quadro:
         return self.nome > other.nome
 
 class MembrosQuadro:
-    def __init__(self, id, idQuadro, idUsuario, aprovado):
+    def __init__(self, id: int, idQuadro: int, idUsuario: int, aprovado: bool, nomeUsuario: str = ""):
         self.id = id
         self.idQuadro = idQuadro
         self.idUsuario = idUsuario
         self.aprovado = aprovado
+        self.nomeUsuario = nomeUsuario
 
     def __str__(self):
         return f"MembrosQuadro(id={self.id}, idQuadro={self.idQuadro}, idUsuario={self.idUsuario}, aprovado={self.aprovado})"

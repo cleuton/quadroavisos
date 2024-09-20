@@ -116,3 +116,24 @@ listarFiltrarUsuarios = """
                     WHERE nome ILIKE %s
                     ORDER BY nome;
                 """
+inserirMembroQuadro = """
+                INSERT INTO membrosQuadro (idQuadro, idUsuario, aprovado) VALUES
+                    (%s, %s, false);
+                """
+removerMembroQuadro = """
+                DELETE FROM membrosQuadro
+                    WHERE idQuadro = %s
+                        AND idUsuario = %s;
+"""
+listarMembrosQuadro = """
+                SELECT mq.*, u.nome FROM membrosQuadro mq
+                    INNER JOIN usuario u
+                        ON mq.idUsuario = u.id
+                    WHERE idQuadro = %s
+                    ORDER BY mq.aprovado ASC, u.nome ASC;
+                """
+aprovarMembroQuadro = """
+                UPDATE membrosQuadro
+                    SET aprovado = True
+                    WHERE idQuadro = %s AND idUsuario = %s;
+                """
