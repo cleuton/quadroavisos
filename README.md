@@ -27,7 +27,6 @@ Ao selecionar um **quadro**, suas mensagens são listadas em ordem decrescente. 
 - Rota para selecionar uma mensagem: `/api/mensagem/id`. 
 
 - Pendências:
-    - incluir logging
     - pedir para participar de quadro
     - aprovar membro de quadro
     - criar trigger para mensagem com expiração
