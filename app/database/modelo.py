@@ -53,12 +53,13 @@ class Administradores:
         return self.id > other.id
 
 class Quadro:
-    def __init__(self, id, nome, descricao, dono, publico):
+    def __init__(self, id: int, nome: str, descricao: str, dono: int, publico: bool, qtde_mensagens: int = 0):
         self.id = id
         self.nome = nome
         self.descricao = descricao
         self.dono = dono
         self.publico = publico
+        self.qtde_mensagens = qtde_mensagens
 
     def __str__(self):
         return f"Quadro(id={self.id}, nome={self.nome}, descricao={self.descricao}, dono={self.dono}, publico={self.publico})"

@@ -34,6 +34,16 @@ class TestDbQuadro(unittest.TestCase):
     def tearDownClass(cls):
         cls._postgres.stop()
 
+    def test_obter_quadro(self):
+        # Testa se vem o quadro com a quantidade de mensagens
+        idQuadro = 3
+        idUsuario = 2
+        quadro = obter_quadro(idQuadro, idUsuario)
+        self.assertFalse(quadro is None)
+        self.assertTrue(quadro.id == idQuadro)
+        self.assertEqual(quadro.qtde_mensagens,3)
+
+
     def test_obter_quadros_usuario_nao_logado(self):
         # Testar a função obter_quadros_usuario quando o usuário não é admin
         quadros = obter_quadros_usuario(None)
@@ -149,7 +159,7 @@ class TestDbQuadro(unittest.TestCase):
         # Tenta aprovar usuario sem ser dono do quadro
         with self.assertRaises(ValueError):
             aprovar_membro_quadro(1, guardar_membro_quadro)
-            
+
         # Tenta listar membros sem ser admin ou membro do quadro
         with self.assertRaises(ValueError):
             listar_membros_quadro(1, idQuadro)

@@ -1,9 +1,9 @@
 from datetime import datetime
 from time import strptime
-from typing import List
+from typing import List, Optional
 from database.db_pool import get_connection, return_connection, sql
-from database.modelo import Mensagem, MensagemComReacoes, Reacao, ReacaoAutor
-from database.db_usuario import ver_perfil_usuario_quadro
+from database.modelo import Mensagem, MensagemComReacoes, Reacao, ReacaoAutor, PerfilUsuarioQuadro
+from database.db_usuario import ver_perfil_usuario_quadro, verificar_direito_usuario
 import logging
 
 logger = logging.getLogger("backend")
@@ -96,7 +96,9 @@ def obter_mensagem_reacoes(id: int, idUsuario: int) -> MensagemComReacoes:
             return_connection(conn)
 
 # Carrega as mensagens para paginação, trazendo também o nome do autor
-def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int, idUsuario: int) -> List[Mensagem]:
+# Lembre-se que a ordem é ao contrário: As últimas são as iniciais!!!!
+# Para ver todas as mensagens de um quadro, o usuário precisa estar logado. Senão, só vê a última mensagem dos quadros públicos
+def listar_mensagens_desc(quadroId: int, mensagemInicial: int, quantidade: int, idUsuario: int) -> List[Mensagem]:
     flog = f"{__file__}::listar_mensagens_desc;"
     if not ver_perfil_usuario_quadro(idUsuario, quadroId):
         mensagem = "Usuario nao tem permissao para acessar essa mensagem"
@@ -110,7 +112,7 @@ def listar_mensagens_desc(quadroId: int, mensagemIdInicial: int, quantidade: int
         cursor = conn.cursor()
 
         # Executar a consulta
-        cursor.execute(sql.mensagensDesc, (quadroId, mensagemIdInicial, quantidade))
+        cursor.execute(sql.mensagensDesc, (quadroId, quantidade, mensagemInicial))
         mensagens = cursor.fetchall()
         if mensagens:
             return [Mensagem(m[0], m[1], m[2], m[9], m[3], m[4], m[5], m[6], m[7], m[8]) for m in mensagens]
@@ -154,7 +156,7 @@ def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
         if conn:
             return_connection(conn)
 
-def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem):
+def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem) -> Optional[int]:
     flog = f"{__file__}::cadastrar_mensagem;"
     if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
         mensagem = "Usuario nao tem permissao para acessar essa mensagem"
@@ -168,10 +170,48 @@ def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem):
         cursor = conn.cursor()
         dataHora = datetime.now()
         # Executar a consulta
-        cursor.execute(sql.cadastrarMensagem,(idQuadro, idUsuario, msg.dataHora.strftime('%Y-%m-%d %H:%M:%S'), msg.titulo, msg.texto, msg.anexo, msg.expiraEm.strftime('%Y-%m-%d %H:%M:%S'), msg.icone))
+        expiraEm = None
+        if msg.expiraEm is not None:
+            expiraEm = msg.expiraEm.strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute(sql.cadastrarMensagem,(idQuadro, idUsuario, msg.dataHora.strftime('%Y-%m-%d %H:%M:%S'), msg.titulo, msg.texto, msg.anexo, expiraEm, msg.icone))
+        mensagem_id = cursor.fetchone()[0]
         conn.commit()
+        return mensagem_id
     except Exception as e:
         mensagem = f"Erro ao cadastrar a mensagem: {msg} usuario: {idUsuario} quadro: {idQuadro} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+# Somente donos de quadro ou administradores podem deletar mensagens
+def deletar_mensagem(mensagem: Mensagem, idUsuario: int):
+    flog = f"{__file__}::deletar_mensagem;"
+    perfil = verificar_direito_usuario(idUsuario, mensagem.idQuadro)
+    if not perfil:
+        mensagem = f"Usuário {idUsuario} não tem acesso ao quadro {mensagem.idQuadro} - Não encontrado"
+        logger.error(f"{flog}{mensagem}")
+        raise ValueError(mensagem)
+    if not perfil.eh_dono_do_quadro and not perfil.eh_administrador:
+        mensagem = f"Usuário {idUsuario} não é dono do quadro {mensagem.idQuadro} e nem administrador"
+        logger.error(f"{flog}{mensagem}")
+        raise ValueError(mensagem)
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(sql.deletarMensagem,(mensagem.id,))
+        conn.commit()
+        mensagem = f"Usuario {idUsuario} deletou a mensagem: {mensagem.id} do quadro: {mensagem.idQuadro}, cujo título é: {mensagem.titulo} e o autor é: {mensagem.idUsuario}"
+        logger.info(f"{flog}{mensagem}")
+    except Exception as e:
+        mensagem = f"Erro ao deletar a mensagem: {mensagem.id} usuario: {idUsuario} quadro: {mensagem.idQuadro} : {e}"
         logger.error(f"{flog}{mensagem}")
         raise
     finally:

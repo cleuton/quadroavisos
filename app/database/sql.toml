@@ -1,7 +1,23 @@
 [query]
 usuarioById = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE id = %s"
 usuarioByEmailSenha = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE email = %s AND senha = %s"
-quadroById = "SELECT id, nome, descricao, dono, publico FROM quadro WHERE id = %s"
+quadroById = """
+                SELECT
+                    quadro.id,
+                    quadro.nome,
+                    quadro.descricao,
+                    quadro.dono,
+                    quadro.publico,
+                    COUNT(mensagem.id) AS qtde_mensagens
+                FROM
+                    quadro
+                LEFT JOIN
+                    mensagem ON mensagem.idQuadro = quadro.id
+                WHERE
+                    quadro.id = %s
+                GROUP BY
+                    quadro.id, quadro.nome, quadro.descricao, quadro.dono, quadro.publico;
+            """
 quadroPublico = """WITH ultima_mensagem AS (
     SELECT m.*, 
     ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
@@ -53,12 +69,12 @@ mensagemComReacoes="""SELECT m.*, ua.nome, r.*, u.nome from mensagem m
                         order by r.dataHora desc
                     """
 mensagensDesc = """SELECT m.*, u.nome
-                    FROM mensagem m INNER JOIN usuario u
-                        on m.idUsuario = u.id
-                    WHERE m.idQuadro = %s
-                        AND m.id <= %s
-                    ORDER BY id DESC
-                    LIMIT %s;"""
+                        FROM mensagem m
+                            INNER JOIN usuario u ON m.idUsuario = u.id
+                        WHERE m.idQuadro = %s
+                        ORDER BY m.dataHora DESC, m.id DESC
+                        LIMIT %s OFFSET %s;
+                """
 upsertReacaoMensagem = """
                     INSERT INTO reacao (dataHora, idMensagem, idUsuario, tipo)
                     VALUES (%s, %s, %s, %s)
@@ -87,7 +103,7 @@ validarAcessoUsuario = """
                     """
 cadastrarMensagem = """
                     INSERT INTO mensagem (idQuadro, idUsuario, dataHora, titulo, texto, anexo, expiraEm, icone) VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s);
+                    (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;
                     """
 criarQuadro = """
                 INSERT INTO quadro (nome, descricao, dono, publico) VALUES
@@ -136,4 +152,8 @@ aprovarMembroQuadro = """
                 UPDATE membrosQuadro
                     SET aprovado = True
                     WHERE idQuadro = %s AND idUsuario = %s;
+                """
+deletarMensagem = """
+                DELETE from mensagem
+                    WHERE id = %s;
                 """

@@ -7,9 +7,11 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 print(f"SYS PATH: ****** {sys.path}")
 from testcontainers.postgres import PostgresContainer
-from database.db_mensagens import listar_mensagens_desc, obter_mensagem, obter_mensagem_reacoes, reagir, cadastrar_mensagem
+from database.db_mensagens import listar_mensagens_desc, obter_mensagem, obter_mensagem_reacoes, reagir, \
+    cadastrar_mensagem, deletar_mensagem
+from database.db_quadro import obter_quadro
 from database.db_pool import reset_connection_pool
-from database.modelo import Reacao, ReacaoAutor, Mensagem
+from database.modelo import Reacao, ReacaoAutor, Mensagem, Quadro
 import os
 
 class TestMensagens(unittest.TestCase):
@@ -29,6 +31,7 @@ class TestMensagens(unittest.TestCase):
         os.environ["DB_PASS"] = cls._postgres.password
         os.environ["DB_DATABASE"] = cls._postgres.dbname
         reset_connection_pool()
+        print(f">>>>>>>>>>>>>>>>>>>>>> Port: {cls._postgres.get_exposed_port(5432)} <<<<<<<<<<<<<<<<<<<<<<<")
 
     @classmethod
     def tearDownClass(cls):
@@ -182,9 +185,8 @@ class TestMensagens(unittest.TestCase):
         # Usuario eh dono do quadro:
         idQuadro = 3
         idUsuario = 2
-        novaMsgId = 9 # Atencao: Isso só funciona se você manter o mesmo create.sql dos testes!!!!
         msg = Mensagem(0, idQuadro, idUsuario, "", datetime.datetime.now(), "mensagem ok", "texto mensagem ok", "anexo.png", datetime.datetime.now(), "atencao.png")
-        cadastrar_mensagem(idUsuario, idQuadro, msg)
+        novaMsgId = cadastrar_mensagem(idUsuario, idQuadro, msg)
         msg = obter_mensagem(novaMsgId, 2)
         self.assertTrue(msg.titulo == "mensagem ok")
         self.assertTrue(msg.texto == "texto mensagem ok")
@@ -194,5 +196,46 @@ class TestMensagens(unittest.TestCase):
         self.assertTrue(msg.expiraEm == msg.dataHora)
         self.assertTrue(msg.anexo == "anexo.png")
         self.assertTrue(msg.icone == "atencao.png")
+
+        # Agora testa deletar a mensagem:
+        deletar_mensagem(msg,4)
+        msg = obter_mensagem(novaMsgId, 2)
+        self.assertTrue(msg is None)
+
+
+    def test_paginar_mensagens(self):
+        # Vamos criar muitas mensagens para testar
+        idQuadro = 3
+        idUsuario = 2
+        for i in range(30):
+            idMensagem = (i+1)
+            cadastrar_mensagem(idUsuario, idQuadro,
+                Mensagem(idMensagem, idQuadro, i + 1, 'Bob Santos', datetime.datetime.now(), f"Titulo msg {idMensagem}",
+                         f"Texto mensagem {idMensagem}", None, None, None))
+        quadro = obter_quadro(idQuadro, idUsuario)
+        qtde_mensagens = quadro.qtde_mensagens
+        mensagens = listar_mensagens_desc(idQuadro,0,5,2)
+        self.assertTrue(len(mensagens) == 5)
+        self.assertTrue(mensagens[0].titulo == "Titulo msg 30")
+        self.assertTrue(mensagens[4].titulo == "Titulo msg 26")
+        mensagens = listar_mensagens_desc(idQuadro,5,5,2)
+        self.assertTrue(len(mensagens) == 5)
+        self.assertTrue(mensagens[0].titulo == "Titulo msg 25")
+        self.assertTrue(mensagens[4].titulo == "Titulo msg 21")
+        # Última página
+        mensagens = listar_mensagens_desc(idQuadro,qtde_mensagens - 5,5,2)
+        self.assertTrue(len(mensagens) == 5)
+        self.assertTrue(mensagens[0].titulo == "Titulo msg 2")
+        self.assertTrue(mensagens[4].titulo == "Novo projeto1")
+        # No meio da última página
+        mensagens = listar_mensagens_desc(idQuadro,qtde_mensagens - 2,5,2)
+        self.assertTrue(len(mensagens) == 2)
+        self.assertTrue(mensagens[0].titulo == "Novo projeto2")
+        self.assertTrue(mensagens[1].titulo == "Novo projeto1")
+        # Página inexistente
+        mensagens = listar_mensagens_desc(idQuadro,qtde_mensagens + 1,5,2)
+        self.assertTrue(len(mensagens) == 0)
+
+
 
 

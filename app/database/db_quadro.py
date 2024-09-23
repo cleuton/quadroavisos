@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger("backend")
 
-# Retorna um Quadro independentemente do usuário ser membro ou administrador
+# Retorna um Quadro com a quantidade de mensagens nele
 def obter_quadro(id:int, idUsuario: int) -> Quadro:
     flog = f"{__file__}::obter_quadro;"
     if not ver_perfil_usuario_quadro(idUsuario, id):
@@ -27,7 +27,7 @@ def obter_quadro(id:int, idUsuario: int) -> Quadro:
         
         # Verificar se o quadro foi encontrado
         if quadro:
-            return Quadro(quadro[0], quadro[1], quadro[2], quadro[3], quadro[4])
+            return Quadro(quadro[0], quadro[1], quadro[2], quadro[3], quadro[4], quadro[5])
         else:
             return None
     except Exception as e:
