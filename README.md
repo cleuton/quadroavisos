@@ -27,13 +27,15 @@ Ao selecionar um **quadro**, suas mensagens são listadas em ordem decrescente. 
 - Rota para selecionar uma mensagem: `/api/mensagem/id`. 
 
 - Pendências:
-    - servico de postar mensagem
-    - servico de cadastrar usuario
+    - servico de obter usuario (para alteracao)
+    - servico de alterar usuario
+    - servico para deletar usuario
+    - servico de marcar/desmarcar usuario como admin
     - servico de pedir para ser membro de quadro
     - servico para aprovar membro de quadro
     - servico para bloquear membro de quadro
+    - servico para listar/pesquisar usuários
     - servico para deletar mensagem
-    - servico para deletar usuario
     - servico de clicar em mensagem
     - servico de reagir à mensagem
     - criar trigger para mensagem com expiração

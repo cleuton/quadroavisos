@@ -186,7 +186,7 @@ class TestMensagens(unittest.TestCase):
         idQuadro = 3
         idUsuario = 2
         msg = Mensagem(0, idQuadro, idUsuario, "", datetime.datetime.now(), "mensagem ok", "texto mensagem ok", "anexo.png", datetime.datetime.now(), "atencao.png")
-        novaMsgId = cadastrar_mensagem(idUsuario, idQuadro, msg)
+        novaMsgId = cadastrar_mensagem(idUsuario, msg)
         msg = obter_mensagem(novaMsgId, 2)
         self.assertTrue(msg.titulo == "mensagem ok")
         self.assertTrue(msg.texto == "texto mensagem ok")
@@ -209,8 +209,7 @@ class TestMensagens(unittest.TestCase):
         idUsuario = 2
         for i in range(30):
             idMensagem = (i+1)
-            cadastrar_mensagem(idUsuario, idQuadro,
-                Mensagem(idMensagem, idQuadro, i + 1, 'Bob Santos', datetime.datetime.now(), f"Titulo msg {idMensagem}",
+            cadastrar_mensagem(idUsuario, Mensagem(idMensagem, idQuadro, i + 1, 'Bob Santos', datetime.datetime.now(), f"Titulo msg {idMensagem}",
                          f"Texto mensagem {idMensagem}", None, None, None))
         quadro = obter_quadro(idQuadro, idUsuario)
         qtde_mensagens = quadro.qtde_mensagens

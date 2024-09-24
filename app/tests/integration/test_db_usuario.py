@@ -1,5 +1,5 @@
 import unittest
-
+from database.db_pool import get_connection, return_connection, sql
 import sys
 import os
 from datetime import datetime
@@ -30,6 +30,7 @@ class TestDbUsuario(unittest.TestCase):
         os.environ["DB_PASS"] = cls._postgres.password
         os.environ["DB_DATABASE"] = cls._postgres.dbname
         reset_connection_pool()
+        print(f">>>>>>>>>>>>>>>>>>>>>> Port: {cls._postgres.get_exposed_port(5432)} <<<<<<<<<<<<<<<<<<<<<<<")
 
     @classmethod
     def tearDownClass(cls):
@@ -68,10 +69,27 @@ class TestDbUsuario(unittest.TestCase):
 
     def test_obter_usuario_valid(self):
         # Testar obtenção de usuário com ID válido
-        user = obter_usuario(self.user_id)
+        idUsuario = 1
+        email = 'alice@example.com'
+        user = obter_usuario(idUsuario)
         self.assertIsNotNone(user)
-        self.assertEqual(user.id, self.user_id)
-        self.assertEqual(user.email, self.email)
+        self.assertEqual(user.id, idUsuario)
+        self.assertEqual(user.email, email)
+        self.assertFalse(user.ehAdmin)
+
+        # Testar usuario admin:
+        idUsuario = 1
+        email = 'alice@example.com'
+        user = obter_usuario(idUsuario)
+        self.assertIsNotNone(user)
+        self.assertEqual(user.id, idUsuario)
+        self.assertEqual(user.email, email)
+        self.assertTrue(user.ehAdmin)
+
+        # Testar usuario inexistente:
+        idUsuario = 0
+        user = obter_usuario(idUsuario)
+        self.assertIsNone(user)
 
     def test_obter_usuario_invalid(self):
         # Testar obtenção de usuário com ID inválido
@@ -118,11 +136,21 @@ class TestDbUsuario(unittest.TestCase):
         self.assertTrue(resp is None)
 
     def test_cadastrar_atualizar_deletar_usuario(self):
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+        # Obter o valor do próximo idUsuario:
+        cursor.execute("SELECT MAX(id) FROM usuario;")
+        resultado = cursor.fetchone()
+        if not resultado[0]:
+            maxId = 0
+        else:
+            maxId = resultado[0]
         # Criar um novo usuario
-        idUsuario = 6 # Id novo usuario. Depende do script create.sql do teste!!!!!
+        idUsuario =  maxId + 1
         usuario = Usuario(0, 'fulano de tal', datetime.strptime('1970-04-10', '%Y-%m-%d').date(),
                           'fulano@teste.com', 'senha123')
-        cadastrar_usuario(usuario)
+        id = cadastrar_usuario(usuario)
         usuario_db = obter_usuario(idUsuario)
         self.assertFalse(usuario_db is None)
         self.assertEqual(usuario_db.nome, usuario.nome)
@@ -168,7 +196,6 @@ class TestDbUsuario(unittest.TestCase):
         self.assertEqual(str(context.exception), "Deletar Usuario inexistente!")
 
     def test_listar_filtrar_usuarios(self):
-
         # Listagem bem sucedida
         idUsuario = 4 # Admin! Depende do script create.sql dos testes!!!!!
         pesquisa = 'os' # Deve listar 2: Bob Santos e Carlos Pereira

@@ -1,5 +1,10 @@
 [query]
-usuarioById = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE id = %s"
+usuarioById = """SELECT u.id, u.nome, u.dataNascimento, u.email, u.senha,
+                    EXISTS (
+                                       SELECT 1 FROM administradores a WHERE a.idUsuario = u.id
+                                       ) AS eh_admin
+                    FROM usuario u WHERE id = %s;"""
+
 usuarioByEmailSenha = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE email = %s AND senha = %s"
 quadroById = """
                 SELECT
@@ -55,7 +60,7 @@ LEFT JOIN ultima_mensagem um ON q.id = um.idQuadro AND um.row_num = 1
 WHERE
     q.dono = %s
     OR mq.idUsuario = %s
-    OR q.publico = TRUE
+    OR q.publico = TRUE;
 """
 mensagem="SELECT * from mensagem where id = %s"
 mensagemComReacoes="""SELECT m.*, ua.nome, r.*, u.nome from mensagem m
@@ -118,7 +123,7 @@ listarFiltrarQuadros = """
                 """
 cadastrarUsuario = """
                     INSERT INTO usuario (nome, dataNascimento, email, senha) VALUES
-                    (%s, %s, %s, %s);
+                    (%s, %s, %s, %s) RETURNING id;
                     """
 atualizarUsuario = """
                     UPDATE USUARIO SET nome = %s, dataNascimento = %s, email = %s, senha = %s
@@ -157,3 +162,11 @@ deletarMensagem = """
                 DELETE from mensagem
                     WHERE id = %s;
                 """
+usuarioComAdmin = """
+SELECT u.*,EXISTS (
+                   SELECT 1 FROM administradores a WHERE a.idUsuario = u.id
+                   ) AS eh_administrador
+       FROM usuario u
+       WHERE u.id = %s;
+"""
+

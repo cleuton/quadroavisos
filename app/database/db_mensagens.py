@@ -156,8 +156,9 @@ def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
         if conn:
             return_connection(conn)
 
-def cadastrar_mensagem(idUsuario: int, idQuadro: int, msg: Mensagem) -> Optional[int]:
+def cadastrar_mensagem(idUsuario: int, msg: Mensagem) -> Optional[int]:
     flog = f"{__file__}::cadastrar_mensagem;"
+    idQuadro = msg.idQuadro
     if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
         mensagem = "Usuario nao tem permissao para acessar essa mensagem"
         logger.error(f"{flog}{mensagem}")

@@ -2,12 +2,13 @@ from database.db_pool import get_connection, return_connection, sql
 from database.modelo import Usuario, PerfilUsuarioQuadro
 from database.db_admins import eh_admin
 import psycopg2
-from typing import List
+from typing import List, Optional
 import logging
 
 logger = logging.getLogger("backend")
 
-def obter_usuario(id:int) -> Usuario:
+# Obter usuário não checa nada. Será papel da camada de serviço fazer isso
+def obter_usuario(id:int) -> Optional[Usuario]:
     flog = f"{__file__}::obter_usuario;"
     conn = None
     cursor = None
@@ -22,7 +23,7 @@ def obter_usuario(id:int) -> Usuario:
         
         # Verificar se o usuário foi encontrado
         if user:
-            return Usuario(user[0], user[1], user[2], user[3], user[4])
+            return Usuario(user[0], user[1], user[2], user[3], "*********", user[5])
         else:
             return None
     except Exception as e:
@@ -104,7 +105,7 @@ def ver_perfil_usuario_quadro(idUsuario: int, idQuadro: int) -> bool:
     return False
 
 # Os usuários mesmo se auto cadastram
-def cadastrar_usuario(usuario: Usuario):
+def cadastrar_usuario(usuario: Usuario) -> Optional[int]:
     flog = f"{__file__}::cadastrar_usuario;"
     conn = None
     cursor = None
@@ -229,3 +230,31 @@ def listar_usuarios(idUsuario: int, pesquisa: str) -> List[Usuario]:
         if conn:
             return_connection(conn)
 
+def verificar_usuario(idUsuario: int) -> PerfilUsuarioQuadro:
+    flog = f"{__file__}::verificar_direito_usuario;"
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.validarAcessoUsuario, (idQuadro, idQuadro, idUsuario))
+        user = cursor.fetchone()
+
+        # Verificar se o usuário foi encontrado
+        if user:
+            return PerfilUsuarioQuadro(user[0], user[1], user[2], user[3])
+        else:
+            return None
+    except Exception as e:
+        mensagem = f"Erro ao verificar perfil usuario quadro: {idUsuario} idQuadro: {idQuadro}  : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)

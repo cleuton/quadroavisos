@@ -1,9 +1,10 @@
 from datetime import datetime
 from datetime import date
+from typing import List
 
 
 class Usuario:
-    def __init__(self, id: int, nome: str, dataNascimento: date, email: str, senha: str):
+    def __init__(self, id: int, nome: str, dataNascimento: date, email: str, senha: str, ehAdmin: bool = False):
         self.id = id
         self.nome = nome
         if type(dataNascimento) != date:
@@ -12,6 +13,7 @@ class Usuario:
             self.dataNascimento = dataNascimento
         self.email = email
         self.senha = senha
+        self.ehAdmin = ehAdmin
 
     def __str__(self):
         return f"Usuario(id={self.id}, nome={self.nome}, dataNascimento={self.dataNascimento}, email={self.email}, senha={self.senha})"
@@ -205,6 +207,8 @@ class QuadroComDono:
     def __init__(self, quadro: Quadro, nomeDono: str):
         self.quadro = quadro
         self.nomeDono = nomeDono
+
+
 
 
 
