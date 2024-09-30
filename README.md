@@ -27,7 +27,6 @@ Ao selecionar um **quadro**, suas mensagens são listadas em ordem decrescente. 
 - Rota para selecionar uma mensagem: `/api/mensagem/id`. 
 
 - Pendências:
-    - servico de obter usuario (para alteracao)
     - servico de alterar usuario
     - servico para deletar usuario
     - servico de marcar/desmarcar usuario como admin

@@ -185,7 +185,17 @@ class QuadroUltimaMensagem:
             self.dataHora = dataHora
         self.icone = icone
         self.titulo = titulo
-
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "nome": self.nome,
+            "descricao": self.descricao,
+            "dono": self.dono,
+            "publico": self.publico,
+            "dataHora": self.dataHora.strftime('%Y-%m-%d %H:%M:%S'),
+            "icone": self.icone,
+            "titulo": self.titulo
+        }
 class ReacaoAutor:
     def __init__(self, reacao: Reacao, nomeAutor: str):
         self.reacao = reacao

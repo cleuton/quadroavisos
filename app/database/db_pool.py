@@ -35,7 +35,7 @@ class SqlConfig:
 # Carregando propriedades:
 sql = SqlConfig()
 sql.carregar_propriedades(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sql.toml'))
-sql.imprimir_dicionario()
+#sql.imprimir_dicionario()
 
 def cria_connection_pool():
     flog = f"{__file__}::cria_connection_pool;"
