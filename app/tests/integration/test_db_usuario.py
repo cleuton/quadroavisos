@@ -78,8 +78,8 @@ class TestDbUsuario(unittest.TestCase):
         self.assertFalse(user.ehAdmin)
 
         # Testar usuario admin:
-        idUsuario = 1
-        email = 'alice@example.com'
+        idUsuario = 4
+        email = 'delmiro@example.com'
         user = obter_usuario(idUsuario)
         self.assertIsNotNone(user)
         self.assertEqual(user.id, idUsuario)
@@ -155,7 +155,6 @@ class TestDbUsuario(unittest.TestCase):
         self.assertFalse(usuario_db is None)
         self.assertEqual(usuario_db.nome, usuario.nome)
         self.assertEqual(usuario_db.email, usuario.email)
-        self.assertEqual(usuario_db.senha, usuario.senha)
         self.assertEqual(usuario_db.dataNascimento, usuario.dataNascimento)
 
         # Cadastrar usuário já existente

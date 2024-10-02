@@ -21,7 +21,9 @@ export default function Header() {
                     {usuario ? (
                         <div>
                             <span>Olá, </span>
-                            <span>{usuario.nome}</span>
+                            <span>{usuario.nome}&nbsp;</span>
+                            {usuario.admin && <span class="dot"></span>}
+                            &nbsp;
                             <Logout />
                         </div>
                     ) : (

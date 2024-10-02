@@ -3,4 +3,5 @@ testcontainers
 toml
 Flask
 Flask-JWT-Extended
+flask-cors
 requests    

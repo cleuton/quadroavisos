@@ -18,4 +18,6 @@ def login_route():
     if not usuario:
         return jsonify({'error': 'Email and senha incorretos'}), 403
     token = create_access_token(identity=usuario.id)
-    return jsonify({'token': token})
+    usuario_dict = usuario.__dict__()
+    usuario_dict['token'] = token
+    return jsonify(usuario_dict)

@@ -2,10 +2,14 @@
 usuarioById = """SELECT u.id, u.nome, u.dataNascimento, u.email, u.senha,
                     EXISTS (
                                        SELECT 1 FROM administradores a WHERE a.idUsuario = u.id
-                                       ) AS eh_admin
+                                       ) AS ehAdmin
                     FROM usuario u WHERE id = %s;"""
 
-usuarioByEmailSenha = "SELECT id, nome, dataNascimento, email, senha FROM usuario WHERE email = %s AND senha = %s"
+usuarioByEmailSenha = """SELECT u.id, u.nome, u.dataNascimento, u.email, u.senha,
+                                    EXISTS (
+                                       SELECT 1 FROM administradores a WHERE a.idUsuario = u.id
+                                    ) AS ehAdmin
+                        FROM usuario u WHERE u.email = %s AND u.senha = %s"""
 quadroById = """
                 SELECT
                     quadro.id,

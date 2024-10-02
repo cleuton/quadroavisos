@@ -32,6 +32,16 @@ class Usuario:
     def __gt__(self, other):
         return self.nome > other.nome
 
+    def __dict__(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'dataNascimento': self.dataNascimento.strftime('%Y-%m-%d'),
+            'email': self.email,
+            'senha': '********',
+            'ehAdmin': self.ehAdmin
+        }
+
 class Administradores:
     def __init__(self, id, idUsuario):
         self.id = id

@@ -52,7 +52,7 @@ def validar_usuario(email:str, password:str) -> Usuario:
         
         # Verificar se o usuário foi encontrado
         if user:
-            return Usuario(user[0], user[1], user[2], user[3], user[4])
+            return Usuario(user[0], user[1], user[2], user[3], user[4], user[5])
         else:
             return None
     except Exception as e:

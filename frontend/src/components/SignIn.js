@@ -1,12 +1,20 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import {UsuarioContext} from '../context/UsuarioContext';
 
 const SignIn = () => {
+  const emailInputRef = useRef(null);
   const { setUsuario } = useContext(UsuarioContext);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   
+  useEffect(() => {
+    // Coloca o foco no campo de email quando o componente for renderizado
+    if (emailInputRef.current) {
+      emailInputRef.current.focus();
+    }
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     fetch('http://localhost:5000/login', {
@@ -28,7 +36,8 @@ const SignIn = () => {
       .then((dados) => {
         const token = dados.token;
         // Armazenar o token e atualizar o contexto
-        setUsuario({ "id": dados.id, "nome": dados.nome, "admin": dados.admin, "token": token });
+        console.log(dados);
+        setUsuario({ "id": dados.id, "nome": dados.nome, "admin": dados.ehAdmin, "token": token });
       })
       .catch((erro) => {
         console.error('Erro na requisição:', erro);
@@ -46,6 +55,7 @@ const SignIn = () => {
           <input
             type="text"
             value={email}
+            ref={emailInputRef} 
             onChange={(e) => setEmail(e.target.value)}
             required
           />

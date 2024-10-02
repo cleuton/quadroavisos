@@ -4,8 +4,9 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from web.login import auth_blueprint
 from web.quadros import quadros_blueprint
-
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 
 # Configuração da chave secreta para o JWT
 app.config['JWT_SECRET_KEY'] = 'minha_chave_secreta'  # Substitua pela sua chave secreta
