@@ -74,7 +74,8 @@ INSERT INTO usuario (nome, dataNascimento, email, senha) VALUES
 ('Bob Santos', '1985-05-15', 'bob@example.com', 'senha456'),
 ('Carlos Pereira', '1978-09-23', 'carlos@example.com', 'senha789'),
 ('Delmiro Admin', '1979-10-20', 'delmiro@example.com', 'senha989'),
-('Enésio não Aprovado', '1982-01-10', 'enesio@example.com', 'senha001');
+('Enésio não Aprovado', '1982-01-10', 'enesio@example.com', 'senha001'),
+('Fulano de tal', '1982-01-10', 'fulano@example.com', 'senha999');
 
 -- Insert fake data into administradores
 -- Só o usuário Delmiro Admin é administrador
@@ -87,7 +88,12 @@ INSERT INTO quadro (nome, descricao, dono, publico) VALUES
 ('Quadro de Anúncios', 'Quadro para anúncios gerais', 1, TRUE),
 ('Quadro de Projetos', 'Quadro para discussão de projetos', 2, FALSE),
 ('Outro quadro do Bob', 'Quadro para discussão de projetos 2 do Bob', 2, FALSE),
-('Quadro de Projetos da Alice', 'Quadro para discussão de projetos da Alice', 1, FALSE);
+('Quadro de Projetos da Alice', 'Quadro para discussão de projetos da Alice', 1, FALSE),
+('Quadro de Projetos 2', 'Quadro para discussão de projetos da 2', 6, FALSE),
+('Quadro de Projetos 3', 'Quadro para discussão de projetos da 3', 6, FALSE),
+('Quadro de Projetos 4', 'Quadro para discussão de projetos da 4', 6, FALSE),
+('Quadro de Projetos 5', 'Quadro para discussão de projetos da 5', 6, FALSE),
+('Quadro de Projetos 6', 'Quadro para discussão de projetos da 6', 6, FALSE);
 
 -- Insert fake data into membrosQuadro
 -- Os quadros públicos não precisam ter membros
@@ -107,7 +113,9 @@ INSERT INTO membrosQuadro (idQuadro, idUsuario, aprovado) VALUES
 (3, 3, TRUE),
 (3, 2, TRUE),
 (3, 5, FALSE),
-(4, 2, TRUE);
+(4, 2, TRUE),
+(4, 6, TRUE);
+
 
 -- Insert fake data into mensagem
 INSERT INTO mensagem (idQuadro, idUsuario, dataHora, titulo, texto, anexo, icone) VALUES
@@ -118,7 +126,33 @@ INSERT INTO mensagem (idQuadro, idUsuario, dataHora, titulo, texto, anexo, icone
 (3, 2, '2024-09-06 12:11:00', 'Novo projeto2', 'Discussão sobre o novo projeto 2.', 'diagrama3.png', 'normal.png'),
 (3, 2, '2024-09-07 12:12:00', 'Novo projeto3', 'Discussão sobre o novo projeto 3.', NULL, 'atencao.png'),
 (4, 1, '2024-09-08 12:12:00', 'Vamos começar o projeto novo', 'Discussão sobre o novo projeto da Alice.', NULL, 'normal.png'),
-(4, 2, '2024-09-09 12:30:00', 'Quem é o stakeholder', 'Quem é o stakeholder do projeto?', NULL, 'question.png');
+(5, 6, '2024-09-08 10:12:00', 'Vamos começar o projeto novo 1', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-08 11:12:00', 'Vamos começar o projeto novo 2', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-08 12:12:00', 'Vamos começar o projeto novo 3', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-08 13:12:00', 'Vamos começar o projeto novo z', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-08 14:12:00', 'Vamos começar o projeto novo x', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-08 15:12:00', 'Vamos começar o projeto novo y', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-08 16:12:00', 'Vamos começar o projeto novo t', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-09 10:12:00', 'Vamos começar o projeto novo aa', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-09 12:13:00', 'Vamos começar o projeto novo a1', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-09 12:14:00', 'Vamos começar o projeto novo b4', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-09 12:15:00', 'Vamos começar o projeto novo b1', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-09 13:12:00', 'Vamos começar o projeto novo zz', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-09 13:13:00', 'Vamos começar o projeto novo 45', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-10 14:12:00', 'Vamos começar o projeto novo 987', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-10 15:12:00', 'Vamos começar o projeto novo ffg', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-10 16:12:00', 'Vamos começar o projeto novo xer', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-10 17:12:00', 'Vamos começar o projeto novo 23', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 10:12:00', 'Vamos começar o projeto novo k4', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 11:12:00', 'Vamos começar o projeto novo kj4', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 12:12:00', 'Vamos começar o projeto novo lo9', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 13:12:00', 'Vamos começar o projeto novo velho', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 14:12:00', 'Vamos começar o projeto novo abc', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 15:12:00', 'Vamos começar o projeto novo def', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 16:12:00', 'Vamos começar o projeto novo ghi', 'Discussão sobre o novo projeto.', NULL, 'normal.png'),
+(5, 6, '2024-09-11 17:12:00', 'Vamos começar o projeto novo kkk', 'Discussão sobre o novo projeto.', NULL, 'normal.png');
+
+
 
 
 -- Insert fake data into reacoes
