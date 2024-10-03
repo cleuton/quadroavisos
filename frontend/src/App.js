@@ -1,9 +1,10 @@
 import logo from './logo.svg';
 import './styles.css';
+import React, {useContext} from 'react';
 import Header from './components/Header';
 import { UsuarioProvider, UsuarioContext } from './context/UsuarioContext';
 import SignIn from './components/SignIn';
-import React, {useContext} from 'react';
+import Quadros from './components/Quadros';
 
 function App() {
   const { usuario } = useContext(UsuarioContext);
@@ -12,6 +13,7 @@ function App() {
       <Header />
       {!usuario && 
         <SignIn />}
+      {usuario && <Quadros />}
     </div>
   );
 }

@@ -1,0 +1,49 @@
+import React, {useState, useContext, useEffect} from "react";
+import { UsuarioContext } from "../context/UsuarioContext";
+
+function formatarDataHora(dataHora) {
+    const dataObj = new Date(dataHora);
+    return dataObj.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+export default function Quadros() {
+    const [quadros, setQuadros] = useState([]);
+    const { usuario } = useContext(UsuarioContext);
+    
+    useEffect(() => {
+        fetch(`http://localhost:5000/quadros`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${usuario.token}`, 
+            }})
+        .then((response) => response.json())
+        .then((data) => setQuadros(data));
+    }, [usuario]);
+    
+    return (
+        <div className="container">
+        <h1>Quadros</h1>
+        {quadros.map((quadro) => (
+            <div key={quadro.id}>
+                <h2 className="descricao">{quadro.descricao}</h2>
+                {quadro.titulo ?                   
+                <div className="mensagem">
+                    {quadro.icone ?
+                    <img src={`/images/${quadro.icone}`} alt="Ícone" className="icone" />
+                    : <img src={`/images/${quadro.normal}`} alt="Ícone" className="icone" />} 
+                    <span className="data-hora">{formatarDataHora(quadro.dataHora)}</span>
+                    <h3 className="titulo">{quadro.titulo}</h3>
+                </div>
+                : <p>Nenhuma mensagem cadastrada</p>}
+            </div>
+        ))}
+        {quadros && quadros.length === 0 && <p>Nenhum quadro cadastrado</p>}
+        </div>
+    );
+}

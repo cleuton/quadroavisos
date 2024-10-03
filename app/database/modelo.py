@@ -202,7 +202,7 @@ class QuadroUltimaMensagem:
             "descricao": self.descricao,
             "dono": self.dono,
             "publico": self.publico,
-            "dataHora": self.dataHora.strftime('%Y-%m-%d %H:%M:%S'),
+            "dataHora": (self.dataHora.strftime('%Y-%m-%d %H:%M:%S') if self.dataHora is not None else None),
             "icone": self.icone,
             "titulo": self.titulo
         }

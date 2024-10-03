@@ -130,4 +130,60 @@
   button:active {
     background-color: #004494;
   }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 16px; /* Definir o tamanho base da fonte para uso com rem */
+  }
+  
+  .container {
+    max-width: 80%;                /* Largura máxima de 80% do viewport */
+    margin: 0 auto;                /* Centraliza o contêiner horizontalmente */
+    background-color: #f0f0f0;
+    padding: 2rem;                 /* Espaçamento interno relativo ao tamanho da fonte */
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 1.25rem;        /* Margem inferior de 1.25 vezes o tamanho da fonte */
+  }
+  
+  h2 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.625rem;
+  }
+  
+  .mensagem {
+    display: grid;
+    grid-template-columns: 3rem 8rem 1fr;  /* Larguras relativas */
+    gap: 0.625rem;                         /* Espaçamento entre colunas e linhas */
+    align-items: center;
+    padding: 0.625rem;
+
+  }
+  
+  .icone {
+    width: 2rem;                  /* Largura da imagem como ícone */
+    height: auto;
+  }
+  
+  .data-hora {
+    color: #666;
+    font-size: 0.875rem;          /* 87.5% do tamanho da fonte base */
+  }
+  
+  .titulo {
+    margin: 0;
+    
+  }
+
+  .descricao {
+    margin: 0;
+    border-top: 1px solid #ccc;
+  }
+  
+  p {
+    font-size: 1rem;              /* Tamanho da fonte para parágrafos */
+  }
   
