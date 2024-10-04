@@ -76,12 +76,16 @@ def verificar_direito_usuario(idUsuario: int, idQuadro: int) -> PerfilUsuarioQua
         cursor = conn.cursor()
 
         # Executar a consulta
-        cursor.execute(sql.validarAcessoUsuario, (idQuadro, idQuadro, idUsuario))
+        cursor.execute(sql.validarAcessoUsuario, (idQuadro, idQuadro, idQuadro, idUsuario)) # Precisa repetir idQuadro
         user = cursor.fetchone()
 
         # Verificar se o usuário foi encontrado
         if user:
-            return PerfilUsuarioQuadro(user[0], user[1], user[2], user[3])
+            if user[4]: # Quadro público
+                membro = True
+            else:
+                membro = user[3]
+            return PerfilUsuarioQuadro(user[0], user[1], user[2], membro)
         else:
             return None
     except Exception as e:

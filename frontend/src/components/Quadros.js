@@ -1,5 +1,7 @@
 import React, {useState, useContext, useEffect} from "react";
 import { UsuarioContext } from "../context/UsuarioContext";
+import { Link } from 'react-router-dom';
+
 
 function formatarDataHora(dataHora) {
     const dataObj = new Date(dataHora);
@@ -31,7 +33,9 @@ export default function Quadros() {
         <h1>Quadros</h1>
         {quadros.map((quadro) => (
             <div key={quadro.id}>
-                <h2 className="descricao">{quadro.descricao}</h2>
+                <Link to={`/quadros/${quadro.id}?pagina=1&qtdemsg=10`}>
+                    <h2 className="descricao">{quadro.descricao}</h2>
+                </Link>
                 {quadro.titulo ?                   
                 <div className="mensagem">
                     {quadro.icone ?

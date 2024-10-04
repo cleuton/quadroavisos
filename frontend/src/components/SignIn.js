@@ -1,5 +1,7 @@
+// components/SignIn.js
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import {UsuarioContext} from '../context/UsuarioContext';
+import { useNavigate } from 'react-router-dom';
+import { UsuarioContext } from '../context/UsuarioContext';
 
 const SignIn = () => {
   const emailInputRef = useRef(null);
@@ -7,9 +9,9 @@ const SignIn = () => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
-  
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Coloca o foco no campo de email quando o componente for renderizado
     if (emailInputRef.current) {
       emailInputRef.current.focus();
     }
@@ -35,9 +37,8 @@ const SignIn = () => {
       })
       .then((dados) => {
         const token = dados.token;
-        // Armazenar o token e atualizar o contexto
-        console.log(dados);
-        setUsuario({ "id": dados.id, "nome": dados.nome, "admin": dados.ehAdmin, "token": token });
+        setUsuario({ id: dados.id, nome: dados.nome, admin: dados.ehAdmin, token: token });
+        navigate('/quadros'); // Redireciona após login
       })
       .catch((erro) => {
         console.error('Erro na requisição:', erro);
@@ -55,7 +56,7 @@ const SignIn = () => {
           <input
             type="text"
             value={email}
-            ref={emailInputRef} 
+            ref={emailInputRef}
             onChange={(e) => setEmail(e.target.value)}
             required
           />

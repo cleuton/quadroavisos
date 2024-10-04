@@ -44,27 +44,30 @@ quadroAdmin = """WITH ultima_mensagem AS (
     SELECT Q.id, Q.nome, Q.descricao, Q.dono, Q.publico, um.dataHora, um.icone, um.titulo
     FROM quadro Q
     LEFT JOIN ultima_mensagem um ON Q.id = um.idQuadro AND um.row_num = 1"""
-quadroUsuario = """WITH ultima_mensagem AS (
+quadroUsuario = """WITH last_message AS (
     SELECT m.*,
-    ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS row_num
+           ROW_NUMBER() OVER (PARTITION BY m.idQuadro ORDER BY m.dataHora DESC) AS rn
     FROM mensagem m
 )
-SELECT DISTINCT
-    q.id,
-    q.nome,
-    q.descricao,
-    q.dono,
-    q.publico,
-    um.dataHora,
-    um.icone,
-    um.titulo
+SELECT q.id,
+       q.nome,
+       q.descricao,
+       q.dono,
+       q.publico,
+       lm.dataHora,
+       lm.icone,
+       lm.titulo
 FROM quadro q
-LEFT JOIN membrosQuadro mq ON q.id = mq.idQuadro AND mq.aprovado = TRUE
-LEFT JOIN ultima_mensagem um ON q.id = um.idQuadro AND um.row_num = 1
-WHERE
-    q.dono = %s
-    OR mq.idUsuario = %s
-    OR q.publico = TRUE;
+LEFT JOIN last_message lm ON q.id = lm.idQuadro AND lm.rn = 1
+WHERE q.dono = %s
+   OR EXISTS (
+       SELECT 1
+       FROM membrosQuadro mq
+       WHERE mq.idQuadro = q.id
+         AND (mq.idUsuario = %s
+         AND mq.aprovado = TRUE)
+         OR q.publico = TRUE
+   );
 """
 mensagem="SELECT * from mensagem where id = %s"
 mensagemComReacoes="""SELECT m.*, ua.nome, r.*, u.nome from mensagem m
@@ -93,7 +96,7 @@ upsertReacaoMensagem = """
                         dataHora = EXCLUDED.dataHora;
                         """
 validarAcessoUsuario = """
-                        -- Parametros: idQuadro, idQuadro, idUsuario
+                        -- Parametros: idQuadro, idQuadro, idQuadro, idUsuario
                         SELECT
                             u.nome,
                             EXISTS (
@@ -104,7 +107,10 @@ validarAcessoUsuario = """
                             ) AS eh_dono_do_quadro,
                             EXISTS (
                                 SELECT 1 FROM membrosQuadro mq WHERE mq.idUsuario = u.id  AND mq.aprovado = TRUE AND mq.idQuadro = %s
-                            ) AS eh_membro_do_quadro
+                            ) AS eh_membro_do_quadro,
+                            EXISTS (
+                                SELECT 1 FROM quadro q WHERE q.id = %s AND q.publico = TRUE
+                            ) as eh_publico
                         FROM
                             usuario u
                         WHERE

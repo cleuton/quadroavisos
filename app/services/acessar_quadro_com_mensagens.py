@@ -15,8 +15,7 @@ def paginar_mensagens_quadro(idUsuarioLogado: int, idQuadroDesejado: int, pagina
         quadro = obter_quadro(idQuadroDesejado, idUsuarioLogado)
         qtde_mensagens = quadro.qtde_mensagens
         inicial = (pagina - 1) * mensagens_por_pagina
-        final = inicial + mensagens_por_pagina
-        if final > qtde_mensagens:
+        if inicial >= qtde_mensagens:
             return []
         return listar_mensagens_desc(idQuadroDesejado, inicial, mensagens_por_pagina, idUsuarioLogado)
     except ValueError as ve:

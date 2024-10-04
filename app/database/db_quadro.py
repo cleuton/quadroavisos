@@ -10,10 +10,7 @@ logger = logging.getLogger("backend")
 # Retorna um Quadro com a quantidade de mensagens nele
 def obter_quadro(id:int, idUsuario: int) -> Quadro:
     flog = f"{__file__}::obter_quadro;"
-    if not ver_perfil_usuario_quadro(idUsuario, id):
-        mensagem = f"Usuario: {idUsuario} nao tem permissao para acessar esse quadro: {id}"
-        logger.error(f"{flog} {mensagem}")
-        raise ValueError("Usuario nao tem permissao para acessar esse quadro")
+
     conn = None
     cursor = None
     try:
@@ -27,6 +24,12 @@ def obter_quadro(id:int, idUsuario: int) -> Quadro:
         
         # Verificar se o quadro foi encontrado
         if quadro:
+            if (not quadro[4]) and (quadro[3] != idUsuario): # Se o quadro não for público
+                if not ver_perfil_usuario_quadro(idUsuario, id):
+                    mensagem = f"Usuario: {idUsuario} nao tem permissao para acessar esse quadro: {id}"
+                    logger.error(f"{flog} {mensagem}")
+                    raise ValueError("Usuario nao tem permissao para acessar esse quadro")
+
             return Quadro(quadro[0], quadro[1], quadro[2], quadro[3], quadro[4], quadro[5])
         else:
             return None
