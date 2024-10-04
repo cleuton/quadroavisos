@@ -137,6 +137,20 @@ class Mensagem:
         else:
             self.expiraEm = expiraEm
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "idQuadro": self.idQuadro,
+            "idUsuario": self.idUsuario,
+            "nomeUsuario": self.nomeUsuario,
+            "dataHora": (self.dataHora.strftime('%Y-%m-%d %H:%M:%S') if self.dataHora is not None else None),
+            "texto": self.texto,
+            "anexo": self.anexo,
+            "icone": self.icone,
+            "titulo": self.titulo,
+            "expiraEm": (self.expiraEm.strftime('%Y-%m-%d %H:%M:%S') if self.expiraEm is not None else None),
+        }
+
     def __str__(self):
         return f"Mensagem(id={self.id}, idQuadro={self.idQuadro}, idUsuario={self.idUsuario}, dataHora={self.dataHora}, texto={self.texto}, anexo={self.anexo}, icone={self.icone})"
 

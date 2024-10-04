@@ -8,3 +8,11 @@ curl -i -X POST http://localhost:5000/login \
 
 curl -i -X GET http://localhost:5000/quadros \
 -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyNzk2MTA0NCwianRpIjoiNjE5NWExNDUtMGNkMi00NmQzLTgzM2QtZTRhZWYyM2NmYTFiIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6NiwibmJmIjoxNzI3OTYxMDQ0LCJjc3JmIjoiYjE3MjczODctODVmZS00MTY1LWEzOTEtMzM2MThjMzBkYWNjIiwiZXhwIjoxNzI3OTY4MjQ0fQ.ry4fz8cd3GqcRcaj1RDmh82YkNOpLELrjmDvz28-ZXQ'
+
+# Obter um quadro com mensagens (pós-logon):
+Para utilizar o quadro 5, faça logon como: fulano@example.com senha999
+curl -i -X GET http://localhost:5000/mensagens/5 \
+-H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyODA0ODk2OSwianRpIjoiMGU4MzNjMmItOTAxMi00YmE1LWIxMzUtNjUwODUzZWNhMDc2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6NiwibmJmIjoxNzI4MDQ4OTY5LCJjc3JmIjoiY2UxNzlkMWUtM2FhMy00NDM5LThmM2EtNmYwYWNiYmYyNTk3IiwiZXhwIjoxNzI4MDU2MTY5fQ.rNARSw9SeYF1HtsvweGE0OFPAzds2ESAhpadAayJE18'
+
+curl -i -X GET http://localhost:5000/mensagens/5?pagina=1&qtdemsg=5 \
+-H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyODA0ODk2OSwianRpIjoiMGU4MzNjMmItOTAxMi00YmE1LWIxMzUtNjUwODUzZWNhMDc2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6NiwibmJmIjoxNzI4MDQ4OTY5LCJjc3JmIjoiY2UxNzlkMWUtM2FhMy00NDM5LThmM2EtNmYwYWNiYmYyNTk3IiwiZXhwIjoxNzI4MDU2MTY5fQ.rNARSw9SeYF1HtsvweGE0OFPAzds2ESAhpadAayJE18'
