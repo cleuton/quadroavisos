@@ -22,7 +22,7 @@ def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
         cursor.execute(sql.mensagem, (id,))
         mensagem = cursor.fetchone()
         if mensagem:
-            msg = Mensagem(mensagem[0], mensagem[1], mensagem[2], None, mensagem[3], mensagem[4], mensagem[5], mensagem[6], mensagem[7], mensagem[8])
+            msg = Mensagem(mensagem[0], mensagem[1], mensagem[2], mensagem[9], mensagem[3], mensagem[4], mensagem[5], mensagem[6], mensagem[7], mensagem[8])
             if not ver_perfil_usuario_quadro(idUsuario, msg.idQuadro):
                 mensagem = "Usuario nao tem permissao para acessar essa mensagem"
                 logger.error(f"{flog}{mensagem}")
@@ -42,6 +42,43 @@ def obter_mensagem(id: int, idUsuario: int) -> Mensagem:
             cursor.close()
         if conn:
             return_connection(conn)
+
+# Obtém reações com nome do usuário
+def obter_reacoes_com_nome_usuario(idMensagem: int, idQuadro: int, idUsuario: int) -> List[Reacao]:
+    flog = f"{__file__}::obter_reacoes_com_nome_usuario;"
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.reacoes, (idMensagem,))
+        reacoes_result = cursor.fetchall()
+        inicio = True
+        reacoes = None
+        if reacoes_result:
+            if not ver_perfil_usuario_quadro(idUsuario, idQuadro):
+                mensagem = "Usuario nao tem permissao para acessar essa mensagem"
+                logger.error(f"{flog}{mensagem}")
+                raise ValueError(mensagem)
+            return [Reacao(r[0], r[1], r[2], r[3], r[4], r[5]) for r in reacoes_result]
+        else:
+            return []
+    except ValueError as v:
+        raise
+    except Exception as e:
+        mensagem = f"Erro ao obter mensagem com reacoes: {id} : {e}"
+        logger.error(f"{flog}{mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
 
 # Obtém mensagem com reações
 def obter_mensagem_reacoes(id: int, idUsuario: int) -> MensagemComReacoes:

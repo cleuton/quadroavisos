@@ -143,12 +143,12 @@ class Mensagem:
             "idQuadro": self.idQuadro,
             "idUsuario": self.idUsuario,
             "nomeUsuario": self.nomeUsuario,
-            "dataHora": (self.dataHora.strftime('%Y-%m-%d %H:%M:%S') if self.dataHora is not None else None),
+            "dataHora": (self.dataHora.strftime('%d-%m-%Y %H:%M:%S') if self.dataHora is not None else None),
             "texto": self.texto,
             "anexo": self.anexo,
             "icone": self.icone,
             "titulo": self.titulo,
-            "expiraEm": (self.expiraEm.strftime('%Y-%m-%d %H:%M:%S') if self.expiraEm is not None else None),
+            "expiraEm": (self.expiraEm.strftime('%d-%m-%Y %H:%M:%S') if self.expiraEm is not None else None),
         }
 
     def __str__(self):
@@ -169,7 +169,7 @@ class Mensagem:
         return self.id > other.id
 
 class Reacao:
-    def __init__(self, id: int, dataHora: datetime, idMensagem: int, idUsuario: int, tipo: str):
+    def __init__(self, id: int, dataHora: datetime, idMensagem: int, idUsuario: int, tipo: str, nomeUsuario: str = None):
         self.id = id
         if type(dataHora) == str:
             self.dataHora = datetime.strptime(dataHora,'%Y-%m-%d %H:%M:%S')
@@ -178,6 +178,17 @@ class Reacao:
         self.idMensagem = idMensagem
         self.idUsuario = idUsuario
         self.tipo = tipo
+        self.nomeUsuario = nomeUsuario
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "idMensagem": self.idMensagem,
+            "idUsuario": self.idUsuario,
+            "tipo": self.tipo,
+            "dataHora": (self.dataHora.strftime('%d-%m-%Y %H:%M:%S') if self.dataHora is not None else None),
+            "nomeUsuario": self.nomeUsuario,
+        }
 
     def __str__(self):
         return f"Reacoes(id={self.id}, dataHora={self.dataHora}, idMensagem={self.idMensagem}, idUsuario={self.idUsuario}, tipo={self.tipo})"
@@ -216,7 +227,7 @@ class QuadroUltimaMensagem:
             "descricao": self.descricao,
             "dono": self.dono,
             "publico": self.publico,
-            "dataHora": (self.dataHora.strftime('%Y-%m-%d %H:%M:%S') if self.dataHora is not None else None),
+            "dataHora": (self.dataHora.strftime('%d-%m-%Y %H:%M:%S') if self.dataHora is not None else None),
             "icone": self.icone,
             "titulo": self.titulo
         }
@@ -226,7 +237,7 @@ class ReacaoAutor:
         self.nomeAutor = nomeAutor
 
 class MensagemComReacoes:
-    def __init__(self, mensagem: Mensagem, reacoes: [ReacaoAutor]):
+    def __init__(self, mensagem: Mensagem, reacoes: List[Reacao]):
         self.mensagem = mensagem
         self.reacoes = reacoes
 

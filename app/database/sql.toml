@@ -69,7 +69,18 @@ WHERE q.dono = %s
          OR q.publico = TRUE
    );
 """
-mensagem="SELECT * from mensagem where id = %s"
+mensagem="""
+        SELECT m.*, u.nome from mensagem m
+            INNER JOIN usuario u
+                ON m.idUsuario = u.id
+            where m.id = %s
+        """
+reacoes="""
+          select r.*, u.nome
+                from reacao r inner join usuario u
+                    on r.idusuario = u.id
+                where r.idmensagem = %s;
+"""
 mensagemComReacoes="""SELECT m.*, ua.nome, r.*, u.nome from mensagem m
                         INNER JOIN reacao r
                             on  m.id = r.idMensagem

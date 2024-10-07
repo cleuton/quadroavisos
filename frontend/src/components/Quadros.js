@@ -1,18 +1,7 @@
 import React, {useState, useContext, useEffect} from "react";
 import { UsuarioContext } from "../context/UsuarioContext";
 import { Link } from 'react-router-dom';
-
-
-function formatarDataHora(dataHora) {
-    const dataObj = new Date(dataHora);
-    return dataObj.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+import { formatarDataHora } from '../utils/funcoes';
 
 export default function Quadros() {
     const [quadros, setQuadros] = useState([]);
@@ -33,7 +22,7 @@ export default function Quadros() {
         <h1>Quadros</h1>
         {quadros.map((quadro) => (
             <div key={quadro.id}>
-                <Link to={`/quadros/${quadro.id}?pagina=1&qtdemsg=10`}>
+                <Link to={`/quadros/${quadro.id}?pagina=1&qtdemsg=10`} state={{ descricao: quadro.descricao}}>
                     <h2 className="descricao">{quadro.descricao}</h2>
                 </Link>
                 {quadro.titulo ?                   

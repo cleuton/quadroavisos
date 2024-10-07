@@ -8,6 +8,7 @@ import SignIn from './components/SignIn';
 import Quadros from './components/Quadros';
 import PrivateRoute from './components/PrivateRoute';
 import QuadroMensagens from './components/QuadroMensagens';
+import Mensagem from './components/Mensagem';
 
 function App() {
   return (
@@ -50,7 +51,16 @@ function Main() {
             <QuadroMensagens />
           </PrivateRoute>
         }
-      />      
+      />
+      {/* Rota para exibir uma mensagem de um quadro */}
+      <Route
+        path="/mensagem/:id"
+        element={
+          <PrivateRoute>
+            <Mensagem />
+          </PrivateRoute>
+        }
+      />         
 
       {/* Redirecionar para /quadros se estiver logado, senão para /login */}
       <Route
