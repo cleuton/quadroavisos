@@ -9,6 +9,8 @@ import Quadros from './components/Quadros';
 import PrivateRoute from './components/PrivateRoute';
 import QuadroMensagens from './components/QuadroMensagens';
 import Mensagem from './components/Mensagem';
+import EditarMensagem from './components/EditarMensagem';
+import EditarQuadro from './components/EditarQuadro';
 
 function App() {
   return (
@@ -60,7 +62,25 @@ function Main() {
             <Mensagem />
           </PrivateRoute>
         }
-      />         
+      />  
+      {/* Rota para cadastrar ou editar uma mensagem em um quadro - usa state */}
+      <Route
+        path="/mensagem/nova"
+        element={
+          <PrivateRoute>
+            <EditarMensagem />
+          </PrivateRoute>
+        }
+      />
+      {/* Rota para criar ou editar um novo quadro - usa state */}
+      <Route
+        path="/quadro/editar"
+        element={
+          <PrivateRoute>
+            <EditarQuadro />
+          </PrivateRoute>
+        }
+      />            
 
       {/* Redirecionar para /quadros se estiver logado, senão para /login */}
       <Route

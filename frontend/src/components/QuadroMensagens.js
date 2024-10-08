@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useSearchParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import { UsuarioContext } from '../context/UsuarioContext';
 import { formatarDataHora } from '../utils/funcoes';
 
@@ -12,6 +12,7 @@ function QuadroMensagens() {
   const [loading, setLoading] = useState(true);
 
   const [descricao, setDescricao] = useState(location.state?.descricao);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!descricao) {
@@ -51,8 +52,25 @@ function QuadroMensagens() {
     return <p>Carregando...</p>;
   }
 
+  const adicionarOuEditarMensagem = (novaMensagem, index = null) => {
+    if (index !== null) {
+      // Editando uma mensagem existente
+      const mensagensAtualizadas = [...mensagens];
+      mensagensAtualizadas[index] = novaMensagem;
+      setMensagens(mensagensAtualizadas);
+    } else {
+      // Adicionando uma nova mensagem
+      setMensagens([...mensagens, novaMensagem]);
+    }
+  };
+
+  const irParaEditarMensagem = (index = null) => {
+    navigate('/mensagem/editar', { state: { adicionarOuEditarMensagem, index, mensagem: index !== null ? mensagens[index] : null } });
+  };
+
   return (
     <div className="container">
+      <button className="button-right" onClick={() => irParaEditarMensagem()}>Nova mensagem</button>
       <h1>Mensagens: {descricao}</h1>
       {loading ? (
         <p>Carregando...</p>

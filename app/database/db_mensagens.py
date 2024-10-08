@@ -193,6 +193,7 @@ def reagir(idMensagem: int, idUsuario: int, idQuadro: int, tipo: str):
         if conn:
             return_connection(conn)
 
+# Podem postar mensagens: Admins, donos ou membros do quadro
 def cadastrar_mensagem(idUsuario: int, msg: Mensagem) -> Optional[int]:
     flog = f"{__file__}::cadastrar_mensagem;"
     idQuadro = msg.idQuadro
