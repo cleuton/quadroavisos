@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import { UsuarioContext } from "../context/UsuarioContext";
 
 export default function EditarQuadro() {
   const nomeInputRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   var { index, quadro_atual } = location.state;
+  const { usuario } = useContext(UsuarioContext);
 
   if (!quadro_atual) {
       quadro_atual = {id: 0, nome: "", descricao: "", dono: 0, publico: false, qtde_mensagens: 0};
@@ -21,10 +22,32 @@ export default function EditarQuadro() {
 
 
   const salvarQuadro = () => {
-    // O backend tem que retornar o id do novo quadro e nós temos que atualizar o quadro com esse id *******
-    setQuadro(quadro);
-    // Navegar de volta para Quadros com o novo quadro como state
-    navigate("/quadros", { state: { index, novoQuadro: quadro } });
+    // Atualizar o quadro no backend
+    quadro.dono = usuario.id;
+    fetch(`http://localhost:5000/quadros`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${usuario.token}`
+      },
+      body: JSON.stringify(quadro),
+    })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw response;
+    })
+    .then((resposta) => {
+      quadro.id = resposta.idQuadro;
+      setQuadro(quadro);
+      // Navegar de volta para Quadros com o novo quadro como state
+      navigate("/quadros", { state: { index, novoQuadro: quadro } });
+
+    })
+    .catch((error) => {
+      console.error("Erro ao salvar quadro: ", error);
+    });
   };
 
   // Função para atualizar o estado do quadro dinamicamente com base no campo
@@ -67,7 +90,7 @@ export default function EditarQuadro() {
           />
         </div>
 
-        <button type="submit" onClick={salvarQuadro}>
+        <button type="submit">
           {index !== null ? "Salvar" : "Adicionar"}
         </button>
         <button className="cancel" onClick={() => navigate("/quadros", {state: null})}>

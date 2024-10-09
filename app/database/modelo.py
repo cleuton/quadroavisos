@@ -90,6 +90,10 @@ class Quadro:
     def __gt__(self, other):
         return self.nome > other.nome
 
+    @classmethod
+    def from_dict(cls, data):
+        return cls(**data)
+
 class MembrosQuadro:
     def __init__(self, id: int, idQuadro: int, idUsuario: int, aprovado: bool, nomeUsuario: str = ""):
         self.id = id

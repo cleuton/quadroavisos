@@ -133,7 +133,7 @@ cadastrarMensagem = """
                     """
 criarQuadro = """
                 INSERT INTO quadro (nome, descricao, dono, publico) VALUES
-                    (%s, %s, %s, %s);
+                    (%s, %s, %s, %s)  RETURNING id;
                 """
 listarFiltrarQuadros = """
                 SELECT Q.*, U.nome from quadro Q

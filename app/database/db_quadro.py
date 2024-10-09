@@ -107,7 +107,7 @@ def _quadros_por_usuario(cursor, idUsuario):
         return None
 
 # Só administradores podem criar quadros
-def criar_quadro(idUsuario: int, quadro: Quadro):
+def criar_quadro(idUsuario: int, quadro: Quadro) -> Optional[int]:
     flog = f"{__file__}::criar_quadro;"
     if not eh_admin(idUsuario):
         mensagem = f"Usuario: {idUsuario} nao eh administrador"
@@ -122,7 +122,9 @@ def criar_quadro(idUsuario: int, quadro: Quadro):
 
         # Executar a consulta
         cursor.execute(sql.criarQuadro, (quadro.nome, quadro.descricao, quadro.dono, quadro.publico))
+        idQuadro = cursor.fetchone()[0]
         conn.commit()
+        return idQuadro
     except Exception as e:
         mensagem = f"Erro ao criar quadro: {quadro} : {e}"
         logger.error(f"{flog} {mensagem}")
