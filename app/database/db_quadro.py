@@ -136,6 +136,78 @@ def criar_quadro(idUsuario: int, quadro: Quadro) -> Optional[int]:
         if conn:
             return_connection(conn)
 
+# Só administradores podem alterar quadros
+def alterar_quadro(idUsuario: int, quadro: Quadro):
+    flog = f"{__file__}::alterar_quadro;"
+    if not eh_admin(idUsuario):
+        mensagem = f"Usuario: {idUsuario} nao eh administrador"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError("Usuario sem permissao")
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consulta
+        cursor.execute(sql.atualizarQuadro, (quadro.nome, quadro.descricao, quadro.id))
+        registros_afetados = cursor.rowcount
+        if registros_afetados != 1:
+            mensagem = f"Tentativa de alterar o quadro {quadro.nome} com erro"
+            logger.error(f"{flog} {mensagem}")
+            raise ValueError(mensagem)
+        conn.commit()
+        return
+    except Exception as e:
+        mensagem = f"Erro ao alterar quadro: {quadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+# Só administradores podem deletar quadros
+def deletar_quadro(idUsuario: int, idQuadro: int):
+    flog = f"{__file__}::deletar_quadro;"
+    if not eh_admin(idUsuario):
+        mensagem = f"Usuario: {idUsuario} nao eh administrador"
+        logger.error(f"{flog} {mensagem}")
+        raise ValueError("Usuario sem permissao")
+    conn = None
+    cursor = None
+    try:
+        # Obter uma conexão do pool
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Executar a consultaS
+        cursor.execute(sql.deletarQuadro, (idQuadro,))
+        registros_afetados = cursor.rowcount
+        if registros_afetados != 1:
+            mensagem = f"Tentativa de deletar o quadro {idQuadro} com erro"
+            logger.error(f"{flog} {mensagem}")
+            raise ValueError(mensagem)
+        mensagem = f"Usuário com id: {idUsuario} deletou o quadro com id: {idQuadro}"
+        logger.warn(f"{flog} {mensagem}")
+        conn.commit()
+        return
+    except Exception as e:
+        mensagem = f"Erro ao deletar quadro: {idQuadro} : {e}"
+        logger.error(f"{flog} {mensagem}")
+        raise
+    finally:
+        # Fechar o cursor e devolver a conexão ao pool
+        if cursor:
+            cursor.close()
+        if conn:
+            return_connection(conn)
+
+
+
 # Lista os quadros encontrados, sem última mensagem, baseados no título do quadro e na pesquisa
 # Traz o nome do dono do quadro
 def listar_filtrar_quadro(pesquisa: str) -> List[QuadroComDono]:

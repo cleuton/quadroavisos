@@ -2,7 +2,7 @@ from datetime import timedelta
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from web.login import auth_blueprint
-from web.quadros import quadros_blueprint, post_quadros_blueprint
+from web.quadros import quadros_blueprint, post_quadros_blueprint, put_quadros_blueprint, delete_quadros_blueprint
 from web.mensagens import mensagens_blueprint, mensagem_blueprint, mensagem_anexo_blueprint
 from flask_cors import CORS
 import os
@@ -25,6 +25,8 @@ jwt = JWTManager(app)
 app.register_blueprint(auth_blueprint)
 app.register_blueprint(quadros_blueprint)
 app.register_blueprint(post_quadros_blueprint)
+app.register_blueprint(put_quadros_blueprint)
+app.register_blueprint(delete_quadros_blueprint)
 app.register_blueprint(mensagens_blueprint)
 app.register_blueprint(mensagem_blueprint)
 app.register_blueprint(mensagem_anexo_blueprint)

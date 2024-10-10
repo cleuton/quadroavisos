@@ -150,6 +150,13 @@ atualizarUsuario = """
                     UPDATE USUARIO SET nome = %s, dataNascimento = %s, email = %s, senha = %s
                         WHERE id = %s;
                     """
+atualizarQuadro = """
+                    UPDATE QUADRO SET nome = %s, descricao = %s
+                        WHERE id = %s;
+                    """
+deletarQuadro = """
+                    DELETE FROM QUADRO WHERE id = %s;
+                """
 deletarUsuario = """
                     DELETE FROM usuario WHERE id = %s;
                     """

@@ -10,7 +10,7 @@ function QuadroMensagens() {
   const { usuario } = useContext(UsuarioContext);
   const [mensagens, setMensagens] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [nome, setNome] = useState(location.state?.nome);
   const [descricao, setDescricao] = useState(location.state?.descricao);
   const navigate = useNavigate();
 
@@ -18,7 +18,10 @@ function QuadroMensagens() {
     if (!descricao) {
       fetch(`/api/elementos/${id}`)
         .then((res) => res.json())
-        .then((data) => setDescricao(data.descricao))
+        .then((data) => {
+          setDescricao(data.descricao);
+          setNome(data.nome);
+        })
         .catch((error) => console.error(error));
     }
   }, [id, descricao]);
@@ -71,7 +74,8 @@ function QuadroMensagens() {
   return (
     <div className="container">
       <button className="button-right" onClick={() => irParaEditarMensagem()}>Nova mensagem</button>
-      <h1>Mensagens: {descricao}</h1>
+      <h1>{nome}</h1>
+      <h2>{descricao}</h2>
       {loading ? (
         <p>Carregando...</p>
       ) : mensagens.length > 0 ? (

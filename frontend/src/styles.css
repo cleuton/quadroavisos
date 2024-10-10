@@ -208,9 +208,42 @@
   .descricao {
     margin: 0;
     border-top: 1px solid #ccc;
+    display: inline-block;
   }
-  
+
   p {
     font-size: 1rem;              /* Tamanho da fonte para parágrafos */
+  }
+
+  .edit-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-left: 0.5rem; /* Espaçamento entre o nome e o botão */
+    color: #007bff;
+  }
+  
+  .edit-button:hover {
+    color: #0056b3; /* Cor ao passar o mouse */
+  }
+
+  .delete-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    color: #dc3545; /* Cor vermelha para representar exclusão */
+  }
+  
+  .delete-button:hover {
+    color: #a71d2a; /* Tom mais escuro ao passar o mouse */
+  }
+
+  .quadro-header {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem; /* Ajuste conforme necessário */
   }
   

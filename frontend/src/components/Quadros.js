@@ -1,10 +1,12 @@
 import React, {useState, useContext, useEffect} from "react";
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import { UsuarioContext } from "../context/UsuarioContext";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { formatarDataHora } from '../utils/funcoes';
 
 export default function Quadros() {
     const [quadros, setQuadros] = useState([]);
+    const [erro, setErro] = useState(''); 
     const { usuario } = useContext(UsuarioContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -40,26 +42,73 @@ export default function Quadros() {
     }
   }, [location.state]);
     
-      const irParaEditarQuadro = (index = null) => {
-        navigate('/quadro/editar', { state: { index, quadro: index !== null ? quadros[index] : null } });
-      };
+  const irParaEditarQuadro = (index = null) => {
+    navigate('/quadro/editar', { state: { index, quadro_atual: index !== null ? quadros[index] : null } });
+  };
+  
+  const handleDelete = (index) => {
+    if (window.confirm('Tem certeza que deseja excluir este quadro?')) {
+      const id = quadros[index].id;
+      fetch(`http://localhost:5000/quadros/${id}`, {
+        method: 'DELETE',
+        headers: {    
+          'Authorization': `Bearer ${usuario.token}`,
+        },  
+      })
+      .then((response) => {
+        if (response.ok) {
+          setQuadros((prevQuadros) => {
+            const quadrosAtualizados = [...prevQuadros];
+            quadrosAtualizados.splice(index, 1);
+            setErro(`Quadro ${quadros[index].nome} excluído com sucesso.`);
+            return quadrosAtualizados;
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Erro ao excluir quadro:', error); 
+        setErro(error.message || 'Erro na conexão com o servidor.');
+      });
+  
+    }
+  };
     
-    
-    return (
+  return (
         <div className="container">
         <h1>Quadros</h1>
-        
+        {erro && <p style={{ color: 'red' }}>{erro}</p>}
         {usuario.admin && 
             <div>
                 <button className="button-right" onClick={() => irParaEditarQuadro()}>Novo quadro</button>
                 <br /><br />
             </div>
          }
-        {quadros.map((quadro) => (
+        {quadros.map((quadro, index) => (
             <div key={quadro.id}>
-                <Link to={`/quadros/${quadro.id}?pagina=1&qtdemsg=10`} state={{ descricao: quadro.nome}}>
-                    <h2 className="descricao">{quadro.nome}</h2>
-                </Link>
+                <div className="quadro-header">
+          
+                  <Link to={`/quadros/${quadro.id}?pagina=1&qtdemsg=10`} state={{ descricao: quadro.descricao, nome: quadro.nome}}>
+                      <h2 className="descricao">{quadro.nome}</h2>
+                  </Link>
+                  {usuario.admin && (
+                    <button
+                        className="edit-button"
+                        onClick={() => irParaEditarQuadro(index)}
+                        title="Editar quadro"
+                    >
+                        <FaEdit size={16} />
+                    </button>
+                  )}  
+                  {usuario.admin && (
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDelete(index)}
+                      title="Excluir quadro"
+                    >
+                      <FaTrash size={16} />
+                    </button>
+                  )}                    
+                </div>
                 {quadro.titulo ?                   
                 <div className="mensagem">
                     {quadro.icone ?
